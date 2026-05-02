@@ -1,1649 +1,869 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AutoRepair Diagnostic Reference</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;600;700&display=swap');
-
-  :root {
-    --bg: #080808;
-    --bg2: #0d0d0d;
-    --bg3: #111;
-    --border: #1e1e1e;
-    --amber: #e8a020;
-    --green: #50d050;
-    --blue: #20a0e8;
-    --red: #e84040;
-    --purple: #a020e8;
-    --teal: #20e8a0;
-    --yellow: #e8e020;
-    --text: #e8e8e8;
-    --muted: #aaa;
-    --dim: #666;
-    --mono: 'Share Tech Mono', 'Courier New', monospace;
-    --sans: 'Barlow', sans-serif;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    min-height: 100vh;
-  }
-
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
-
-  /* ── HEADER ── */
-  #header {
-    background: #0a0a0a;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  #header-inner {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 18px 24px 0;
-  }
-  #brand-tag {
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--amber);
-    font-weight: 700;
-    margin-bottom: 2px;
-  }
-  #brand-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #fff;
-    font-family: var(--sans);
-    letter-spacing: -0.5px;
-    margin-bottom: 2px;
-  }
-  #brand-sub {
-    font-size: 10px;
-    color: #2e2e2e;
-    letter-spacing: 2px;
-    margin-bottom: 14px;
-  }
-
-  /* ── TABS ── */
-  #tabs {
-    display: flex;
-    border-top: 1px solid var(--border);
-    overflow-x: auto;
-    gap: 0;
-  }
-  #tabs::-webkit-scrollbar { height: 0; }
-  .tab-btn {
-    background: none;
-    border: none;
-    border-top: 2px solid transparent;
-    color: #3a3a3a;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    margin-top: -1px;
-    padding: 10px 16px;
-    transition: color 0.15s;
-    white-space: nowrap;
-  }
-  .tab-btn:hover { color: #777; }
-  .tab-btn.active { color: var(--amber); border-top-color: var(--amber); }
-
-  /* ── MAIN ── */
-  #main {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 28px 24px 80px;
-  }
-
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* ── FORM ELEMENTS ── */
-  label.field-label {
-    display: block;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--dim);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  input, select, textarea {
-    background: var(--bg3);
-    border: 1px solid #2a2a2a;
-    border-radius: 2px;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    outline: none;
-    padding: 10px 12px;
-    width: 100%;
-    transition: border-color 0.15s;
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--amber); }
-  input::placeholder, textarea::placeholder { color: #2e2e2e; }
-  textarea { resize: vertical; line-height: 1.6; min-height: 80px; }
-  select option { background: var(--bg3); }
-
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-  .field { margin-bottom: 14px; }
-
-  /* ── BUTTON ── */
-  .btn-primary {
-    background: var(--amber);
-    border: none;
-    border-radius: 2px;
-    color: #000;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    padding: 12px 28px;
-    transition: opacity 0.15s;
-  }
-  .btn-primary:hover { opacity: 0.82; }
-  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  .btn-chip {
-    background: var(--bg3);
-    border: 1px solid #222;
-    border-radius: 2px;
-    color: #666;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1px;
-    padding: 5px 10px;
-    transition: all 0.15s;
-  }
-  .btn-chip:hover { color: var(--amber); border-color: #444; }
-
-  /* ── CARDS ── */
-  .card {
-    background: var(--bg2);
-    border-radius: 3px;
-    margin-bottom: 12px;
-    padding: 16px 18px;
-    position: relative;
-  }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    border-radius: 3px 3px 0 0;
-    background: var(--amber);
-  }
-  .card.c-blue::before { background: var(--blue); }
-  .card.c-green::before { background: var(--green); }
-  .card.c-red::before { background: var(--red); }
-  .card.c-purple::before { background: var(--purple); }
-  .card.c-teal::before { background: var(--teal); }
-  .card.c-yellow::before { background: var(--yellow); }
-  .card.c-dim::before { background: #444; }
-
-  .card-title {
-    color: var(--amber);
-    font-size: 10px;
-    letter-spacing: 3px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-  }
-  .card.c-blue .card-title { color: var(--blue); }
-  .card.c-green .card-title { color: var(--green); }
-  .card.c-red .card-title { color: var(--red); }
-  .card.c-purple .card-title { color: var(--purple); }
-  .card.c-teal .card-title { color: var(--teal); }
-  .card.c-yellow .card-title { color: var(--yellow); }
-
-  .body-text {
-    color: var(--muted);
-    font-family: var(--sans);
-    font-size: 13px;
-    line-height: 1.7;
-  }
-
-  /* ── BADGES ── */
-  .badge {
-    border-radius: 2px;
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    padding: 3px 8px;
-  }
-  .badge-db   { background: #0a2a1a; color: var(--green); }
-  .badge-easy { background: #1a3a1a; color: var(--green); }
-  .badge-med  { background: #3a2a0a; color: var(--amber); }
-  .badge-hard { background: #3a0a0a; color: var(--red); }
-  .badge-safe   { background: #0a2a0a; color: var(--green); }
-  .badge-unsafe { background: #2a0a0a; color: var(--red); }
-
-  /* ── LISTS ── */
-  ol.result-list, ul.result-list {
-    padding-left: 18px;
-    margin: 0;
-  }
-  ol.result-list li, ul.result-list li {
-    color: var(--muted);
-    font-family: var(--sans);
-    font-size: 13px;
-    line-height: 1.7;
-    margin-bottom: 4px;
-  }
-
-  /* ── FIX ROWS ── */
-  .fix-row {
-    border-bottom: 1px solid #1a1a1a;
-    margin-bottom: 14px;
-    padding-bottom: 14px;
-  }
-  .fix-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .fix-header {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .fix-name { color: #fff; font-family: var(--mono); font-size: 14px; font-weight: 600; }
-
-  /* ── DTC HEADER ── */
-  .dtc-header {
-    align-items: flex-start;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .dtc-code { color: var(--amber); font-size: 28px; font-weight: 700; }
-  .dtc-name { color: #fff; font-size: 15px; margin-top: 4px; }
-  .dtc-system { color: var(--dim); font-size: 12px; margin-top: 4px; }
-  .drive-pill {
-    border-radius: 3px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 8px 16px;
-  }
-  .drive-yes { background: #0a2a0a; color: var(--green); }
-  .drive-no  { background: #2a0a0a; color: var(--red); }
-
-  /* ── TABLE ── */
-  .data-table { border-collapse: collapse; font-family: var(--mono); font-size: 12px; width: 100%; overflow-x: auto; display: block; }
-  .data-table th { color: var(--dim); font-size: 10px; font-weight: 400; letter-spacing: 1px; padding: 6px 10px; text-align: left; border-bottom: 1px solid #333; }
-  .data-table td { padding: 10px; border-bottom: 1px solid #1a1a1a; }
-
-  /* ── FLUID GRID ── */
-  .fluid-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-  .fluid-card {
-    background: var(--bg2);
-    border-radius: 3px;
-    padding: 14px 16px;
-    position: relative;
-  }
-  .fluid-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    border-radius: 3px 3px 0 0;
-  }
-  .fluid-system { font-size: 11px; letter-spacing: 2px; margin-bottom: 4px; text-transform: uppercase; }
-  .fluid-capacity { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 10px; }
-  .fluid-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .fluid-meta-item label { color: #444; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 2px; }
-  .fluid-meta-item span { color: #ccc; font-size: 11px; }
-
-  /* ── NOT FOUND / INFO BOXES ── */
-  .box-notfound {
-    background: #121200;
-    border: 1px solid #333;
-    border-radius: 3px;
-    margin-top: 16px;
-    padding: 14px 16px;
-  }
-  .box-notfound .box-title { color: var(--amber); font-size: 11px; letter-spacing: 2px; margin-bottom: 6px; }
-  .box-notfound .box-body { color: #777; font-family: var(--sans); font-size: 13px; line-height: 1.7; }
-
-  /* ── WARNING BOX ── */
-  .box-warning {
-    background: #1a0000;
-    border: 1px solid #3a1010;
-    border-radius: 3px;
-    margin-bottom: 12px;
-    padding: 14px 16px;
-    position: relative;
-  }
-  .box-warning::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--red); border-radius: 3px 3px 0 0; }
-  .box-warning .card-title { color: var(--red); }
-  .box-warning .body-text { color: #ff8080; }
-
-  /* ── QUICK PICKS ── */
-  .quick-picks { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
-  .qp-label { color: #333; font-size: 10px; letter-spacing: 3px; margin-bottom: 8px; }
-
-  /* ── STAT BOXES ── */
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  /* ── FOOTER ── */
-  #footer {
-    border-top: 1px solid #111;
-    padding: 14px 24px;
-    text-align: center;
-  }
-  #footer span { color: #1e1e1e; font-size: 10px; letter-spacing: 2px; }
-
-  /* ── RELATED CODE CHIPS ── */
-  .related-chip {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 2px;
-    color: var(--amber);
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1px;
-    padding: 4px 8px;
-    transition: background 0.15s;
-  }
-  .related-chip:hover { background: #2a2a0a; }
-
-  /* ── TIP ROW ── */
-  .tip-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: flex-start; }
-  .tip-star { color: var(--yellow); flex-shrink: 0; }
-
-  /* ── SETTINGS ── */
-  #settings-btn {
-    background: transparent;
-    border: 1px solid #2a2a2a;
-    border-radius: 2px;
-    color: #666;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 2px;
-    padding: 6px 12px;
-    transition: all 0.15s;
-    position: absolute;
-    top: 20px;
-    right: 24px;
-  }
-  #settings-btn:hover { color: var(--amber); border-color: var(--amber); }
-  #settings-btn.configured { color: var(--green); border-color: #1a3a1a; }
-
-  .modal-backdrop {
-    background: rgba(0,0,0,0.85);
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: flex-start;
-    justify-content: center;
-    z-index: 1000;
-    padding: 40px 20px;
-    overflow-y: auto;
-  }
-  .modal-backdrop.active { display: flex; }
-  .modal {
-    background: #0d0d0d;
-    border: 1px solid #2a2a2a;
-    border-radius: 4px;
-    max-width: 520px;
-    width: 100%;
-    padding: 24px;
-    position: relative;
-  }
-  .modal::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--amber);
-    border-radius: 4px 4px 0 0;
-  }
-  .modal h2 {
-    color: var(--amber);
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-  }
-  .modal .close-x {
-    background: transparent;
-    border: none;
-    color: #555;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 18px;
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    transition: color 0.15s;
-  }
-  .modal .close-x:hover { color: var(--amber); }
-
-  .ai-status {
-    background: #0a0a0a;
-    border-radius: 3px;
-    padding: 10px 12px;
-    margin-top: 16px;
-  }
-  .ai-status.active { background: #0a1a0a; }
-  .ai-status.inactive { background: #1a1a0a; }
-  .ai-status-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; margin-bottom: 4px; }
-  .ai-status.active .ai-status-label { color: var(--green); }
-  .ai-status.inactive .ai-status-label { color: var(--amber); }
-  .ai-status-desc { color: #777; font-family: var(--sans); font-size: 12px; line-height: 1.5; }
-
-  /* ── AI LOADING ── */
-  .ai-spinner {
-    border: 2px solid #2a2a2a;
-    border-top-color: var(--amber);
-    border-radius: 50%;
-    display: inline-block;
-    height: 14px;
-    width: 14px;
-    animation: spin 0.8s linear infinite;
-    vertical-align: middle;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .badge-ai { background: #1a1a2a; color: #8080e8; }
-
-  /* ── COMMUNITY REPORTS ── */
-  .report-card {
-    background: #0a1a0a;
-    border: 1px solid #1a3a1a33;
-    border-left: 3px solid var(--green);
-    border-radius: 3px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-  }
-  .report-header {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: space-between;
-    margin-bottom: 6px;
-  }
-  .report-fix {
-    color: #fff;
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 700;
-  }
-  .report-meta {
-    color: #555;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1px;
-    margin-top: 6px;
-  }
-  .report-worked { background: #0a2a0a; color: var(--green); }
-  .report-didnt { background: #2a2a0a; color: var(--yellow); }
-  .btn-secondary {
-    background: transparent;
-    border: 1px solid var(--green);
-    border-radius: 2px;
-    color: var(--green);
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    padding: 10px 20px;
-    transition: all 0.15s;
-  }
-  .btn-secondary:hover { background: #0a2a0a; }
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid #333;
-    border-radius: 2px;
-    color: #777;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 2px;
-    padding: 10px 20px;
-  }
-  .btn-ghost:hover { color: #ccc; border-color: #555; }
-  .delete-btn {
-    background: transparent;
-    border: none;
-    color: #444;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1px;
-    padding: 0;
-    transition: color 0.15s;
-  }
-  .delete-btn:hover { color: var(--red); }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-  .char-count { color: #333; font-size: 10px; font-family: var(--mono); text-align: right; margin-top: 4px; }
-
-  @media (max-width: 600px) {
-    .form-row, .form-row-3 { grid-template-columns: 1fr; }
-  }
-</style>
-</head>
-<body>
-
-<div id="header">
-  <div id="header-inner">
-    <button id="settings-btn" onclick="openSettings()">⚙ SETTINGS</button>
-    <div id="brand-tag">AUTOREPAIR</div>
-    <div id="brand-title">Diagnostic Reference</div>
-    <div id="brand-sub">DTC CODES · TORQUE SPECS · FLUID CAPACITIES · COMPLAINT DIAGNOSIS</div>
-    <div id="tabs">
-      <button class="tab-btn active" onclick="switchTab('complaint')">🔍 COMPLAINT</button>
-      <button class="tab-btn" onclick="switchTab('dtc')">⚡ DTC</button>
-      <button class="tab-btn" onclick="switchTab('torque')">🔩 TORQUE</button>
-      <button class="tab-btn" onclick="switchTab('fluids')">🛢 FLUIDS</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════ SETTINGS MODAL ═══════════════════ -->
-<div id="settings-modal" class="modal-backdrop" onclick="if(event.target===this) closeSettings()">
-  <div class="modal">
-    <button class="close-x" onclick="closeSettings()">✕</button>
-    <h2>⚙ SETTINGS</h2>
-
-    <div style="margin-bottom: 20px">
-      <label class="field-label">🤖 OPENAI API KEY (OPTIONAL)</label>
-      <input id="api-key-input" type="password" placeholder="sk-...">
-      <div style="color:#666;font-family:var(--sans);font-size:12px;line-height:1.6;margin-top:8px">
-        The built-in database handles common DTC codes, torque specs, and fluid capacities instantly.
-        Paste an OpenAI API key here to get <strong style="color:#aaa">AI fallback</strong> when the database doesn't have an answer.
-      </div>
-    </div>
-
-    <div id="ai-status" class="ai-status inactive">
-      <div class="ai-status-label">◦ AI FALLBACK: DISABLED</div>
-      <div class="ai-status-desc">Database lookups still work. Add a key to unlock AI answers for uncommon queries.</div>
-    </div>
-
-    <div style="margin-top: 20px; padding: 14px; background: #080808; border-radius: 3px">
-      <div style="color:var(--amber);font-family:var(--mono);font-size:10px;letter-spacing:2px;margin-bottom:8px">HOW TO GET A KEY:</div>
-      <ol style="color:#888;font-family:var(--sans);font-size:12px;line-height:1.8;padding-left:20px;margin:0">
-        <li>Go to <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--amber)">platform.openai.com/api-keys</a></li>
-        <li>Sign in (or create an account)</li>
-        <li>Click <strong style="color:#aaa">"Create new secret key"</strong></li>
-        <li>Copy the key (starts with <code style="color:var(--amber)">sk-...</code>) — you only see it once</li>
-        <li>Paste it above</li>
-        <li>Make sure you have credit at <a href="https://platform.openai.com/usage" target="_blank" style="color:var(--amber)">platform.openai.com/usage</a> ($5 lasts a long time)</li>
-      </ol>
-      <div style="color:#666;font-family:var(--sans);font-size:11px;line-height:1.6;margin-top:10px;padding-top:10px;border-top:1px solid #1a1a1a">
-        <strong style="color:#aaa">Cost:</strong> Pennies per month with caching. Uses gpt-4o-mini (~$0.0002 per lookup).<br>
-        <strong style="color:#aaa">Privacy:</strong> Your key is saved only on this device (localStorage). Never uploaded anywhere except directly to OpenAI.
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
-      <button class="btn-primary" onclick="saveSettings()">▶ SAVE</button>
-      <button class="btn-ghost" onclick="clearApiKey()" id="clear-key-btn" style="display:none">REMOVE KEY</button>
-      <button class="btn-ghost" onclick="clearAiCache()">CLEAR AI CACHE</button>
-    </div>
-    <div id="cache-info" style="margin-top:12px;font-family:var(--mono);font-size:10px;color:#444;letter-spacing:1px"></div>
-  </div>
-</div>
-
-<div id="main">
-
-  <!-- ═══════════════════════════════════════════════════ TAB: COMPLAINT -->
-  <div id="tab-complaint" class="tab-panel active">
-    <div class="grid-3">
-      <div><label class="field-label">Year</label>
-        <select id="c-year"><option value="">Select</option></select></div>
-      <div><label class="field-label">Make</label>
-        <select id="c-make" onchange="populateModels('c-make','c-model')"><option value="">Select</option></select></div>
-      <div><label class="field-label">Model</label>
-        <select id="c-model"><option value="">Select</option></select></div>
-    </div>
-    <div class="field">
-      <label class="field-label">Complaint / Symptom</label>
-      <textarea id="c-complaint" placeholder="e.g. A/C blows warm air, rough idle at startup, brake squealing, won't start, overheating"></textarea>
-    </div>
-    <button class="btn-primary" onclick="runComplaint()">▶ RUN DIAGNOSIS</button>
-    <div id="c-result"></div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════ TAB: DTC -->
-  <div id="tab-dtc" class="tab-panel">
-    <div class="field">
-      <label class="field-label">DTC Code</label>
-      <input id="d-code" type="text" placeholder="e.g. P0300" style="text-transform:uppercase;letter-spacing:2px;font-size:18px;max-width:220px"
-        onkeydown="if(event.key==='Enter') runDTC()">
-    </div>
-    <button class="btn-primary" onclick="runDTC()">▶ DECODE DTC</button>
-    <div id="d-result"></div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════ TAB: TORQUE -->
-  <div id="tab-torque" class="tab-panel">
-    <div class="field">
-      <label class="field-label">Component / Fastener</label>
-      <input id="t-component" placeholder="e.g. lug nuts, spark plugs, oil drain plug, cylinder head bolts"
-        onkeydown="if(event.key==='Enter') runTorque()">
-    </div>
-    <div class="qp-label">QUICK PICKS</div>
-    <div class="quick-picks">
-      <button class="btn-chip" onclick="quickTorque('Lug Nuts')">Lug Nuts</button>
-      <button class="btn-chip" onclick="quickTorque('Spark Plugs')">Spark Plugs</button>
-      <button class="btn-chip" onclick="quickTorque('Oil Drain Plug')">Oil Drain Plug</button>
-      <button class="btn-chip" onclick="quickTorque('Brake Caliper Bolts')">Brake Caliper Bolts</button>
-      <button class="btn-chip" onclick="quickTorque('Cylinder Head Bolts')">Cylinder Head Bolts</button>
-      <button class="btn-chip" onclick="quickTorque('Valve Cover Bolts')">Valve Cover Bolts</button>
-      <button class="btn-chip" onclick="quickTorque('Axle Nut')">Axle Nut</button>
-    </div>
-    <button class="btn-primary" onclick="runTorque()">▶ GET TORQUE SPECS</button>
-    <div id="t-result"></div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════ TAB: FLUIDS -->
-  <div id="tab-fluids" class="tab-panel">
-    <div class="grid-3">
-      <div><label class="field-label">Year (opt)</label>
-        <select id="f-year"><option value="">Any</option></select></div>
-      <div><label class="field-label">Make</label>
-        <select id="f-make" onchange="populateModels('f-make','f-model')"><option value="">Select</option></select></div>
-      <div><label class="field-label">Model</label>
-        <select id="f-model"><option value="">Select</option></select></div>
-    </div>
-    <button class="btn-primary" onclick="runFluids()">▶ GET FLUID SPECS</button>
-    <div id="f-result"></div>
-  </div>
-
-</div>
-
-<div id="footer"><span>FOR REFERENCE ONLY · VERIFY WITH FACTORY SERVICE MANUAL · CONSULT A QUALIFIED TECHNICIAN</span></div>
-
-<script>
-// ═══════════════════════════════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════════════════════════════
-
-const YEARS = Array.from({length:35},(_,i)=>2024-i);
-const MAKES = ["Acura","BMW","Buick","Cadillac","Chevrolet","Chrysler","Dodge","Ford","GMC","Honda","Hyundai","Infiniti","Jeep","Kia","Lexus","Lincoln","Mazda","Mercedes-Benz","Mitsubishi","Nissan","Ram","Subaru","Tesla","Toyota","Volkswagen","Volvo"];
+import { useState, useEffect } from "react";
+const YEARS = Array.from({ length: 35 }, (_, i) => 2024 - i);
+const MAKES = ["Acura","BMW","Buick","Cadillac","Chevrolet","Chrysler","Dodge","Ford","GMC","
 const MODELS = {
-  Ford:["F-150","Mustang","Explorer","Escape","Edge","Fusion","Focus","Bronco","Ranger","Expedition"],
-  Chevrolet:["Silverado","Equinox","Malibu","Traverse","Tahoe","Camaro","Colorado","Blazer","Suburban","Trax"],
-  Toyota:["Camry","Corolla","RAV4","Tacoma","Tundra","Highlander","4Runner","Prius","Sienna","Venza"],
-  Honda:["Civic","Accord","CR-V","Pilot","Odyssey","HR-V","Ridgeline","Passport","Fit","Element"],
-  Nissan:["Altima","Sentra","Rogue","Pathfinder","Frontier","Murano","Maxima","Armada","Titan","Kicks"],
-  Dodge:["Ram 1500","Charger","Challenger","Durango","Journey","Grand Caravan","Dart","Viper"],
-  Jeep:["Wrangler","Grand Cherokee","Cherokee","Compass","Gladiator","Renegade","Patriot"],
-  BMW:["3 Series","5 Series","7 Series","X3","X5","X7","M3","M5","4 Series","2 Series"],
-  "Mercedes-Benz":["C-Class","E-Class","S-Class","GLE","GLC","GLS","A-Class","CLA","AMG GT"],
-  Hyundai:["Elantra","Sonata","Tucson","Santa Fe","Palisade","Kona","Ioniq","Veloster","Accent"],
-  Kia:["Sorento","Sportage","Telluride","Soul","Forte","Stinger","Carnival","Seltos","Niro"],
-  Subaru:["Outback","Forester","Crosstrek","Impreza","Legacy","Ascent","WRX","BRZ","Solterra"],
-  GMC:["Sierra","Terrain","Acadia","Yukon","Canyon","Envoy","Jimmy"],
-  Ram:["1500","2500","3500","ProMaster","Dakota"],
-  Mazda:["Mazda3","Mazda6","CX-5","CX-9","CX-30","MX-5 Miata","CX-50"],
-  Volkswagen:["Jetta","Passat","Tiguan","Atlas","Golf","GTI","ID.4","Taos"],
-  Lexus:["RX","ES","NX","GX","IS","LS","UX","LC"],
-  Acura:["MDX","RDX","TLX","ILX","NSX","RLX"],
-  Buick:["Enclave","Encore","LaCrosse","Verano","Envision"],
-  Cadillac:["Escalade","XT5","CT5","CT4","XT4","XT6"],
-  Chrysler:["300","Pacifica","Voyager"],
-  Lincoln:["Navigator","Aviator","Corsair","Nautilus","Continental"],
-  Infiniti:["Q50","Q60","QX60","QX80","QX50"],
-  Mitsubishi:["Outlander","Eclipse Cross","Galant","Lancer","Mirage"],
-  Volvo:["XC90","XC60","S60","V60","XC40","S90"],
-  Tesla:["Model 3","Model Y","Model S","Model X","Cybertruck"],
+Ford: ["F-150","Mustang","Explorer","Escape","Edge","Fusion","Focus","Bronco","Ranger","Exp
+Chevrolet: ["Silverado","Equinox","Malibu","Traverse","Tahoe","Camaro","Colorado","Blazer",
+Toyota: ["Camry","Corolla","RAV4","Tacoma","Tundra","Highlander","4Runner","Prius","Sienna"
+Honda: ["Civic","Accord","CR-V","Pilot","Odyssey","HR-V","Ridgeline","Passport","Fit","Elem
+Nissan: ["Altima","Sentra","Rogue","Pathfinder","Frontier","Murano","Maxima","Armada","Tita
+Dodge: ["Ram 1500","Charger","Challenger","Durango","Journey","Grand Caravan","Dart","Viper
+Jeep: ["Wrangler","Grand Cherokee","Cherokee","Compass","Gladiator","Renegade","Patriot"],
+BMW: ["3 Series","5 Series","7 Series","X3","X5","X7","M3","M5","4 Series","2 Series"],
+"Mercedes-Benz": ["C-Class","E-Class","S-Class","GLE","GLC","GLS","A-Class","CLA","AMG GT"]
+Hyundai: ["Elantra","Sonata","Tucson","Santa Fe","Palisade","Kona","Ioniq","Veloster","Acce
+Kia: ["Sorento","Sportage","Telluride","Soul","Forte","Stinger","Carnival","Seltos","Niro"]
+Subaru: ["Outback","Forester","Crosstrek","Impreza","Legacy","Ascent","WRX","BRZ","Solterra
+GMC: ["Sierra","Terrain","Acadia","Yukon","Canyon","Envoy","Jimmy"],
+Ram: ["1500","2500","3500","ProMaster","Dakota"],
+Mazda: ["Mazda3","Mazda6","CX-5","CX-9","CX-30","MX-5 Miata","CX-50"],
+Volkswagen: ["Jetta","Passat","Tiguan","Atlas","Golf","GTI","ID.4","Taos"],
+Lexus: ["RX","ES","NX","GX","IS","LS","UX","LC"],
+Acura: ["MDX","RDX","TLX","ILX","NSX","RLX"],
+Buick: ["Enclave","Encore","LaCrosse","Verano","Envision"],
+Cadillac: ["Escalade","XT5","CT5","CT4","XT4","XT6"],
+Chrysler: ["300","Pacifica","Voyager"],
+Lincoln: ["Navigator","Aviator","Corsair","Nautilus","Continental"],
+Infiniti: ["Q50","Q60","QX60","QX80","QX50"],
+Mitsubishi: ["Outlander","Eclipse Cross","Galant","Lancer","Mirage"],
+Volvo: ["XC90","XC60","S60","V60","XC40","S90"],
+Tesla: ["Model 3","Model Y","Model S","Model X","Cybertruck"],
 };
-
-const DTC_DB = {
-  "P0010":{code:"P0010",full_name:"'A' Camshaft Position Actuator Circuit (Bank 1)",system:"Engine / VVT",description:"Electrical problem with the intake camshaft variable valve timing solenoid on bank 1.",common_causes:["Failed VVT/VCT solenoid","Low or dirty engine oil blocking oil flow","Wiring issue to solenoid","Clogged oil passages"],symptoms:["Check Engine Light","Rough idle","Reduced fuel economy","Loss of power"],diagnosis_procedure:["Check engine oil level and condition first","Test VVT solenoid resistance (typically 6.8–7.9 ohms)","Check for 12V and ground at solenoid connector","Inspect oil passages for blockage"],common_fixes:[{fix:"Oil change with correct viscosity",notes:"Use OEM-specified weight. Most common fix.",difficulty:"Easy"},{fix:"Replace VVT/VCT solenoid (bank 1 intake)",notes:"Usually bolts to cylinder head near cam gear. $40–100.",difficulty:"Easy"},{fix:"Clean VVT solenoid screen",notes:"Some solenoids have a removable screen that clogs.",difficulty:"Easy"}],related_codes:["P0011","P0012","P0013","P0014"],drive_safe:true,drive_note:"Generally safe to drive short distances. Check oil level immediately."},
-  "P0011":{code:"P0011",full_name:"'A' Camshaft Position - Timing Over-Advanced (Bank 1)",system:"Engine / VVT",description:"The intake camshaft on bank 1 is more advanced than commanded by the PCM.",common_causes:["Dirty or low engine oil","Stuck-open VVT solenoid","Clogged oil control valve","Stretched timing chain"],symptoms:["Check Engine Light","Rough idle especially at startup","Loss of low-end power","Poor fuel economy"],diagnosis_procedure:["Check oil level and condition first","Inspect and clean/replace VVT solenoid","Check oil pressure","Inspect timing chain stretch"],common_fixes:[{fix:"Oil & filter change",notes:"Many P0011 codes clear after fresh OEM-spec oil.",difficulty:"Easy"},{fix:"Replace VVT solenoid and clean screen",notes:"$40–100 part.",difficulty:"Easy"},{fix:"Timing chain replacement",notes:"Only if chain is measurably stretched. Major job.",difficulty:"Hard"}],related_codes:["P0010","P0012","P0021"],drive_safe:true,drive_note:"Drive safely to a shop. Avoid hard acceleration."},
-  "P0128":{code:"P0128",full_name:"Coolant Thermostat — Temperature Below Regulating Temp",system:"Engine / Cooling",description:"Engine is not reaching operating temperature within the expected time. Usually a stuck-open thermostat.",common_causes:["Stuck-open thermostat (most common)","Faulty coolant temperature sensor","Low coolant level"],symptoms:["Check Engine Light","Temp gauge reads lower than normal","Poor fuel economy","Weak heater output"],diagnosis_procedure:["Check coolant level","Watch ECT on scan tool — if it never reaches 170–180°F, thermostat is stuck open"],common_fixes:[{fix:"Replace thermostat",notes:"$15–40 part, 1–2 hour job. Very common fix.",difficulty:"Easy"},{fix:"Replace ECT sensor",notes:"$15–30 part.",difficulty:"Easy"},{fix:"Top off coolant",notes:"Low coolant can cause false readings.",difficulty:"Easy"}],related_codes:["P0116","P0117","P0118","P0125"],drive_safe:true,drive_note:"Safe to drive but fuel economy suffers. Replace thermostat soon."},
-  "P0171":{code:"P0171",full_name:"System Too Lean (Bank 1)",system:"Engine / Fuel Trim",description:"The engine is running lean on bank 1. The PCM is adding extra fuel trying to compensate.",common_causes:["Vacuum leak (intake gasket, PCV hose, brake booster)","Dirty or faulty MAF sensor","Clogged fuel injectors","Weak fuel pump"],symptoms:["Check Engine Light","Rough idle","Hesitation on acceleration","Reduced power","Poor fuel economy"],diagnosis_procedure:["Check fuel trims with scan tool — STFT and LTFT both positive confirms lean","Smoke test or spray carb cleaner around intake for vacuum leaks","Clean MAF sensor","Check fuel pressure"],common_fixes:[{fix:"Clean MAF sensor",notes:"Use only MAF sensor cleaner spray. Very common fix.",difficulty:"Easy"},{fix:"Replace PCV valve and hoses",notes:"Cheap, quick fix for many vacuum leak issues.",difficulty:"Easy"},{fix:"Replace intake manifold gasket",notes:"Common on Ford 4.6L, GM 3.1/3.4L.",difficulty:"Medium"},{fix:"Replace fuel pump or filter",notes:"Only if fuel pressure tests low.",difficulty:"Medium"}],related_codes:["P0172","P0174","P0175","P0300"],drive_safe:true,drive_note:"Usually safe to drive but fix soon. Severe lean conditions can damage catalytic converters."},
-  "P0172":{code:"P0172",full_name:"System Too Rich (Bank 1)",system:"Engine / Fuel Trim",description:"The engine is running with too much fuel on bank 1. PCM is removing fuel trying to compensate.",common_causes:["Leaking fuel injector","Faulty MAF sensor","Stuck-open fuel pressure regulator","Clogged air filter"],symptoms:["Black smoke from exhaust","Strong fuel smell","Poor fuel economy","Rough idle"],diagnosis_procedure:["Check fuel trims — both STFT and LTFT negative","Inspect air filter","Clean or replace MAF sensor","Check fuel pressure"],common_fixes:[{fix:"Replace air filter",notes:"Simplest first check.",difficulty:"Easy"},{fix:"Clean or replace MAF sensor",notes:"MAF cleaner only — never touch the wire.",difficulty:"Easy"},{fix:"Replace fuel pressure regulator",notes:"Test first; replace if pressure is too high.",difficulty:"Medium"},{fix:"Replace leaking fuel injector",notes:"Identify with balance test. $30–150.",difficulty:"Medium"}],related_codes:["P0171","P0175","P0132","P0135"],drive_safe:true,drive_note:"Driveable but damages the catalytic converter over time. Repair within a few days."},
-  "P0300":{code:"P0300",full_name:"Random / Multiple Cylinder Misfire Detected",system:"Engine / Ignition",description:"Misfires detected across multiple cylinders with no single dominant cylinder. Often worn plugs or a vacuum leak.",common_causes:["Worn spark plugs (most common)","Failing ignition coils","Vacuum leak","Low fuel pressure","Low compression"],symptoms:["Flashing or steady Check Engine Light","Rough idle, bucking, hesitation","Loss of power","Fuel smell from exhaust"],diagnosis_procedure:["Check for specific cylinder codes P0301–P0308","Pull and inspect spark plugs","Swap coils to see if misfire follows","Smoke test for vacuum leaks"],common_fixes:[{fix:"Replace all spark plugs",notes:"Use OEM or OEM-equivalent. Don't mix brands.",difficulty:"Easy"},{fix:"Replace failing ignition coils",notes:"$20–80 each. Swap-test to identify bad one.",difficulty:"Easy"},{fix:"Fix vacuum leak",notes:"Intake manifold gasket, PCV system, brake booster hose.",difficulty:"Medium"}],related_codes:["P0301","P0302","P0303","P0304","P0171"],drive_safe:false,drive_note:"FLASHING CEL = pull over immediately. Unburnt fuel is destroying your catalytic converter."},
-  "P0301":{code:"P0301",full_name:"Cylinder 1 Misfire Detected",system:"Engine / Ignition",description:"Misfire localized to cylinder 1. Easier to diagnose than P0300 — start by swapping the coil.",common_causes:["Bad spark plug on cyl 1","Bad ignition coil on cyl 1","Bad fuel injector on cyl 1","Low compression on cyl 1"],symptoms:["Check Engine Light (may flash)","Rough idle","Noticeable engine shake","Reduced power"],diagnosis_procedure:["Swap the coil from cyl 1 to another cylinder","If code follows coil, replace the coil","If code stays on cyl 1, try the spark plug next","Compression test if plug and coil are good"],common_fixes:[{fix:"Replace cyl 1 spark plug",notes:"Swap to another cylinder first — if misfire follows, it's the plug.",difficulty:"Easy"},{fix:"Replace cyl 1 ignition coil",notes:"$20–80.",difficulty:"Easy"},{fix:"Replace cyl 1 fuel injector",notes:"$30–150.",difficulty:"Medium"}],related_codes:["P0300","P0302","P0171"],drive_safe:false,drive_note:"Flashing CEL = stop driving. Steady CEL = drive gently to repair."},
-  "P0302":{code:"P0302",full_name:"Cylinder 2 Misfire Detected",system:"Engine / Ignition",description:"Misfire localized to cylinder 2.",common_causes:["Bad spark plug on cyl 2","Bad ignition coil on cyl 2","Bad fuel injector on cyl 2","Low compression cyl 2"],symptoms:["Check Engine Light (may flash)","Rough idle","Engine shake","Power loss"],diagnosis_procedure:["Swap coil from cyl 2 to another cylinder — if misfire follows, it's the coil","If misfire stays on cyl 2, swap spark plug next","Compression test if plug and coil check out"],common_fixes:[{fix:"Replace cyl 2 spark plug",notes:"$5–20 per plug.",difficulty:"Easy"},{fix:"Replace cyl 2 ignition coil",notes:"$20–80.",difficulty:"Easy"},{fix:"Replace cyl 2 injector",notes:"$30–150.",difficulty:"Medium"}],related_codes:["P0300","P0301","P0171"],drive_safe:false,drive_note:"Flashing light = stop immediately. Otherwise drive gently to repair."},
-  "P0303":{code:"P0303",full_name:"Cylinder 3 Misfire Detected",system:"Engine / Ignition",description:"Misfire localized to cylinder 3.",common_causes:["Bad spark plug (cyl 3)","Bad ignition coil (cyl 3)","Bad injector (cyl 3)","Low compression"],symptoms:["CEL (may flash)","Rough idle","Engine shake","Power loss"],diagnosis_procedure:["Swap cyl 3 coil to another cylinder — if misfire follows coil, replace it","If misfire stays on cyl 3, swap plug","Compression test last"],common_fixes:[{fix:"Replace spark plug",notes:"Try this first — cheapest and most common cause.",difficulty:"Easy"},{fix:"Replace ignition coil",notes:"$20–80.",difficulty:"Easy"},{fix:"Replace injector",notes:"$30–150.",difficulty:"Medium"}],related_codes:["P0300","P0301","P0302","P0304"],drive_safe:false,drive_note:"Flashing CEL = stop driving. Steady CEL = drive gently to shop."},
-  "P0304":{code:"P0304",full_name:"Cylinder 4 Misfire Detected",system:"Engine / Ignition",description:"Misfire on cylinder 4.",common_causes:["Bad plug, coil, or injector on cyl 4","Low compression cyl 4","Intake leak near cyl 4"],symptoms:["CEL","Rough idle","Shake","Power loss"],diagnosis_procedure:["Coil and plug swap test","Injector swap","Compression test"],common_fixes:[{fix:"Replace spark plug",notes:"Start here.",difficulty:"Easy"},{fix:"Replace ignition coil",notes:"If swap test confirms.",difficulty:"Easy"},{fix:"Replace injector",notes:"If plug and coil are good.",difficulty:"Medium"}],related_codes:["P0300","P0303","P0305"],drive_safe:false,drive_note:"Flashing light = stop now. Steady = drive gently to shop."},
-  "P0420":{code:"P0420",full_name:"Catalyst System Efficiency Below Threshold (Bank 1)",system:"Emissions / Catalyst",description:"The downstream O2 sensor shows similar activity to the upstream sensor — the catalytic converter isn't cleaning exhaust efficiently.",common_causes:["Failed catalytic converter (most common)","Bad downstream O2 sensor","Exhaust leak before downstream sensor","Engine running rich or misfiring"],symptoms:["Check Engine Light (usually the only symptom)","Failed emissions test","Possible sulfur smell"],diagnosis_procedure:["Check for exhaust leaks first — very common cause of false P0420","Compare upstream vs downstream O2 waveforms on scan tool","Try replacing downstream O2 sensor before buying a cat"],common_fixes:[{fix:"Fix exhaust leak",notes:"Check flanges, gaskets, and bolts near the cat first.",difficulty:"Easy"},{fix:"Replace downstream (rear) O2 sensor",notes:"$40–150. Try this before the cat.",difficulty:"Easy"},{fix:"Replace catalytic converter",notes:"OEM $500–2500+. Aftermarket direct-fit $200–600.",difficulty:"Medium"}],related_codes:["P0421","P0430","P0135","P0141"],drive_safe:true,drive_note:"Safe to drive but will fail emissions. If cat is clogged you may feel power loss."},
-  "P0430":{code:"P0430",full_name:"Catalyst System Efficiency Below Threshold (Bank 2)",system:"Emissions / Catalyst",description:"Same as P0420 but for bank 2 on V6/V8 engines.",common_causes:["Failed bank 2 catalytic converter","Bad downstream O2 sensor (bank 2)","Exhaust leak on bank 2"],symptoms:["Check Engine Light","Failed emissions test","Possible sulfur smell"],diagnosis_procedure:["Identify which side is bank 2 (opposite cylinder 1)","Check for exhaust leaks on bank 2 side","Compare O2 sensor waveforms"],common_fixes:[{fix:"Fix bank 2 exhaust leak",notes:"Check flanges/gaskets on bank 2 side first.",difficulty:"Easy"},{fix:"Replace bank 2 downstream O2 sensor",notes:"Cheaper than a cat, worth trying first.",difficulty:"Easy"},{fix:"Replace bank 2 catalytic converter",notes:"Verify bank 2 location before ordering.",difficulty:"Medium"}],related_codes:["P0420","P0431","P0155","P0161"],drive_safe:true,drive_note:"Safe to drive. Will fail emissions. Fix before state inspection."},
-  "P0442":{code:"P0442",full_name:"Evaporative Emission System Small Leak Detected",system:"Emissions / EVAP",description:"The EVAP system (captures fuel vapors) has a small leak detected. Often just a loose gas cap.",common_causes:["Loose or damaged gas cap (most common!)","Cracked EVAP hose","Faulty purge valve","Faulty vent valve"],symptoms:["Check Engine Light","Sometimes a fuel smell","Usually no driveability symptoms"],diagnosis_procedure:["Check gas cap first — make sure it clicks when tightening","If cap is fine, smoke test the EVAP system","Check purge valve and vent valve operation"],common_fixes:[{fix:"Replace gas cap",notes:"$10–25. Fixes a huge percentage of EVAP codes.",difficulty:"Easy"},{fix:"Replace purge valve",notes:"$30–80 part.",difficulty:"Easy"},{fix:"Replace EVAP hoses",notes:"Check for cracked rubber hoses near fuel tank.",difficulty:"Easy"}],related_codes:["P0440","P0441","P0446","P0455"],drive_safe:true,drive_note:"Completely safe to drive. Will fail emissions inspection."},
-  "P0446":{code:"P0446",full_name:"Evaporative Emission System Vent Control Circuit",system:"Emissions / EVAP",description:"The EVAP vent valve isn't responding correctly. Can cause hard-to-fill gas tank.",common_causes:["Stuck or clogged vent valve (often from dirt or spider webs)","Bad vent valve solenoid","Damaged wiring to vent valve"],symptoms:["Check Engine Light","Hard to fill gas tank (pump shuts off early)","Otherwise usually no symptoms"],diagnosis_procedure:["Locate vent valve (usually near EVAP canister by fuel tank)","Unplug and check for 12V and ground","Apply 12V directly to see if it clicks open/closed"],common_fixes:[{fix:"Clean vent valve",notes:"Free fix if debris is the cause. Blow out with compressed air.",difficulty:"Easy"},{fix:"Replace vent valve",notes:"$30–80 part.",difficulty:"Easy"},{fix:"Replace EVAP canister",notes:"Only if canister is physically damaged.",difficulty:"Medium"}],related_codes:["P0442","P0455","P0449"],drive_safe:true,drive_note:"Safe to drive. If gas pump keeps shutting off early at the station, this is likely why."},
-  "P0455":{code:"P0455",full_name:"Evaporative Emission System Large Leak Detected",system:"Emissions / EVAP",description:"Large EVAP leak — usually a missing or very damaged gas cap, or a disconnected hose.",common_causes:["Missing gas cap","Severely damaged gas cap","Disconnected large EVAP hose","Cracked fuel filler neck"],symptoms:["Check Engine Light","Strong fuel smell near vehicle"],diagnosis_procedure:["First: confirm gas cap is present and sealing properly","Smell-test around fuel filler and EVAP lines","Smoke test to find large leak source"],common_fixes:[{fix:"Install or replace gas cap",notes:"Must be OEM-spec. Cheap caps often don't seal properly.",difficulty:"Easy"},{fix:"Reconnect or replace EVAP hose",notes:"Inspect the large rubber lines between tank and engine bay.",difficulty:"Easy"},{fix:"Replace fuel filler neck",notes:"If rusted through. Common on older vehicles in salt-belt states.",difficulty:"Hard"}],related_codes:["P0442","P0446","P0457"],drive_safe:true,drive_note:"Safe to drive but strong fuel smell can be dangerous around ignition sources."},
-  "P0500":{code:"P0500",full_name:"Vehicle Speed Sensor (VSS) Malfunction",system:"Transmission / ABS",description:"PCM isn't getting a valid signal from the vehicle speed sensor.",common_causes:["Failed vehicle speed sensor","Damaged wiring to VSS","Faulty ABS wheel speed sensor (on newer vehicles)","Tone ring damage"],symptoms:["Check Engine Light","Speedometer not working or erratic","Cruise control won't engage","Harsh or erratic transmission shifts"],diagnosis_procedure:["Check speedometer function","Scan ABS system for wheel speed codes","Locate VSS and check wiring","Check tone ring for damage"],common_fixes:[{fix:"Replace VSS",notes:"$20–60 part. Usually one or two bolts.",difficulty:"Easy"},{fix:"Repair wiring",notes:"Check for rodent damage or corrosion near sensor.",difficulty:"Medium"},{fix:"Replace ABS wheel speed sensor",notes:"On newer vehicles that use ABS sensors for speed. $40–150.",difficulty:"Easy"}],related_codes:["P0501","P0502","C0035","C0040"],drive_safe:true,drive_note:"Drive carefully — speedometer may be inaccurate. Avoid highway driving."},
-  "P0562":{code:"P0562",full_name:"System Voltage Low",system:"Electrical / Charging",description:"PCM detected charging system voltage lower than expected. Battery or alternator issue.",common_causes:["Weak battery","Bad battery cable connections (corrosion)","Failing alternator","Slipping serpentine belt"],symptoms:["Check Engine Light","Battery warning light","Dim headlights","Slow engine crank","Electrical accessories malfunctioning"],diagnosis_procedure:["Measure battery voltage with engine off (should be 12.4–12.7V)","With engine running: should be 13.7–14.7V","Check serpentine belt and connections","Test alternator output"],common_fixes:[{fix:"Clean battery terminals",notes:"Free fix if corrosion is the problem. Baking soda + water.",difficulty:"Easy"},{fix:"Replace battery",notes:"$100–250. Most common cause on vehicles 4+ years old.",difficulty:"Easy"},{fix:"Replace alternator",notes:"$150–400 part.",difficulty:"Medium"},{fix:"Replace serpentine belt",notes:"If slipping. $15–40 belt.",difficulty:"Easy"}],related_codes:["P0560","P0563"],drive_safe:false,drive_note:"If battery light is on, you may have 20–60 minutes before stalling. Head directly to a shop."},
-  "P0700":{code:"P0700",full_name:"Transmission Control System Malfunction",system:"Transmission",description:"The TCM has stored transmission-specific fault codes. P0700 is a messenger — you must read the TCM codes separately with a capable scan tool.",common_causes:["Low or dirty transmission fluid","Failed shift solenoid","Failed transmission range sensor","Failed TCM"],symptoms:["Check Engine Light","Transmission stuck in limp mode (usually 2nd or 3rd gear)","Harsh shifts or no upshifts","Transmission warning light"],diagnosis_procedure:["Use an advanced scan tool to read TCM codes — basic OBD-II readers only show P0700","Check transmission fluid level and condition","Address the specific code the TCM stored"],common_fixes:[{fix:"Pull specific transmission codes",notes:"You must have a scanner that reads transmission module codes.",difficulty:"Easy"},{fix:"Transmission fluid and filter service",notes:"If fluid is burnt, dark, or low.",difficulty:"Easy"},{fix:"Replace shift solenoid",notes:"After confirming with specific codes. $50–200.",difficulty:"Medium"}],related_codes:["P0715","P0720","P0730","P0750","P0755"],drive_safe:false,drive_note:"If transmission is in limp mode, drive directly home or to a shop. Don't ignore this."},
-  "P2096":{code:"P2096",full_name:"Post Catalyst Fuel Trim System Too Lean (Bank 1)",system:"Emissions",description:"Downstream O2 sensor shows lean condition after the catalytic converter. Often an exhaust leak.",common_causes:["Small exhaust leak between upstream and downstream O2 sensors","Failing downstream O2 sensor","Failing upstream O2 sensor"],symptoms:["Check Engine Light","Often no driveability symptoms","Sometimes paired with P0420"],diagnosis_procedure:["Inspect exhaust for leaks from manifold back to downstream sensor","Listen for ticking or hissing from exhaust","Replace downstream O2 sensor if no leak found"],common_fixes:[{fix:"Fix exhaust leak",notes:"Most common cause. Check gaskets and flanges.",difficulty:"Medium"},{fix:"Replace downstream O2 sensor",notes:"$40–150.",difficulty:"Easy"},{fix:"Replace upstream O2 sensor",notes:"If lazy response on scan tool.",difficulty:"Easy"}],related_codes:["P2097","P0420","P0171"],drive_safe:true,drive_note:"Safe. Check for exhaust leak first — cheap fix."},
-  "C0035":{code:"C0035",full_name:"Left Front Wheel Speed Sensor Circuit",system:"ABS / Wheel Speed",description:"Problem with the left front wheel speed sensor. Affects ABS, traction control, and stability control. Regular brakes still work.",common_causes:["Metal debris on sensor tip (very common — brake dust)","Damaged sensor from road hazard","Broken tone ring","Damaged wiring"],symptoms:["ABS warning light","Traction Control light","Stability Control light","Sometimes CEL"],diagnosis_procedure:["Remove sensor and inspect tip for metal debris or brake dust","Check wiring from sensor to connector for damage","Measure sensor resistance (typically 900–2000 ohms)"],common_fixes:[{fix:"Clean metal debris off sensor tip",notes:"Free fix. Very often just brake dust/metal shavings.",difficulty:"Easy"},{fix:"Replace wheel speed sensor",notes:"$40–150.",difficulty:"Easy"},{fix:"Replace wheel hub assembly",notes:"If tone ring is damaged. $80–250.",difficulty:"Medium"}],related_codes:["C0040","C0045","C0050"],drive_safe:true,drive_note:"Regular brakes still work — only ABS is disabled. Drive carefully in slippery conditions."},
-  "U0100":{code:"U0100",full_name:"Lost Communication With ECM/PCM",system:"Network / Communication",description:"Another module on the CAN bus can't communicate with the engine computer. Usually electrical.",common_causes:["Bad PCM power or ground connection","Dead battery or recent jump-start","Damaged CAN bus wiring","Blown fuse for PCM","Failed PCM (rare)"],symptoms:["Multiple warning lights (CEL, ABS, TC, airbag all at once)","Speedometer/tach dead","Vehicle may not start","In severe limp mode"],diagnosis_procedure:["Check battery voltage and connections first","Check all fuses related to PCM in both fuse boxes","Inspect CAN bus wiring for rodent damage or chafing"],common_fixes:[{fix:"Clean and tighten battery connections",notes:"Fixes many communication faults.",difficulty:"Easy"},{fix:"Replace blown fuse",notes:"Check underhood and in-cabin fuse boxes.",difficulty:"Easy"},{fix:"Repair CAN bus wiring",notes:"Look for rodent damage or chafed insulation.",difficulty:"Hard"},{fix:"Replace PCM",notes:"Last resort — expensive and requires programming.",difficulty:"Hard"}],related_codes:["U0101","U0121","U0140","U0155"],drive_safe:false,drive_note:"Vehicle may be undriveable or in severe limp mode. Tow if necessary."},
+const DTC_DATABASE = {
+"P0300": { code:"P0300", full_name:"Random/Multiple Cylinder Misfire Detected", system:"Eng
+"P0420": { code:"P0420", full_name:"Catalyst System Efficiency Below Threshold (Bank 1)", s
+"P0171": { code:"P0171", full_name:"System Too Lean (Bank 1)", system:"Engine / Fuel Trim",
+"P0442": { code:"P0442", full_name:"Evaporative Emission System Small Leak Detected", syste
+"P0128": { code:"P0128", full_name:"Coolant Thermostat (Coolant Temperature Below Thermosta
+"P0562": { code:"P0562", full_name:"System Voltage Low", system:"Electrical / Charging", de
+"P0700": { code:"P0700", full_name:"Transmission Control System Malfunction", system:"Trans
 };
-
-const TORQUE_DB = {
-  "lug nuts":{component:"Lug Nuts / Wheel Bolts",vehicle_note:"Values vary by vehicle. ALWAYS verify with your owner's manual.",specs:[{fastener:"Compact cars (12mm studs)",location:"Wheel hub",ftlb:"80–90 ft-lb",nm:"108–122 Nm",sequence:"Star pattern",notes:"Re-torque after 50–100 miles"},{fastener:"Mid-size cars (12mm studs)",location:"Wheel hub",ftlb:"85–100 ft-lb",nm:"115–135 Nm",sequence:"Star pattern",notes:""},{fastener:"Full-size cars & SUVs (14mm studs)",location:"Wheel hub",ftlb:"100–120 ft-lb",nm:"135–163 Nm",sequence:"Star pattern",notes:""},{fastener:"1/2-ton trucks (14mm studs)",location:"Wheel hub",ftlb:"120–140 ft-lb",nm:"163–190 Nm",sequence:"Star pattern",notes:""}],sequence_desc:"Always use a star/criss-cross pattern — never go around in a circle.",warnings:["NEVER use an impact gun for final torque — always finish with a calibrated torque wrench","Under-torqued lug nuts can cause a wheel to come off while driving","Over-torqued lug nuts can warp brake rotors and stretch studs","Re-torque after 50–100 miles — lug nuts can settle and loosen"],thread_info:"Most passenger vehicles use 12mm x 1.5 or 14mm x 1.5/2.0 threads.",mistakes:["Using an impact gun for final torque","Skipping the star pattern — can warp rotors","Not re-torquing after 50–100 miles","Mixing up lug nut seat types (conical vs ball vs flat)"],wrench:"1/2\" drive click-type torque wrench, 20–150 ft-lb range"},
-  "spark plugs":{component:"Spark Plugs",vehicle_note:"Torque varies by plug seat type (gasket vs tapered) and head material (aluminum vs iron).",specs:[{fastener:"14mm gasket seat, aluminum head",location:"Cylinder head",ftlb:"13–20 ft-lb",nm:"18–27 Nm",sequence:"N/A",notes:"Start plug by hand to prevent cross-threading"},{fastener:"14mm tapered seat, aluminum head",location:"Cylinder head",ftlb:"7–15 ft-lb",nm:"10–20 Nm",sequence:"N/A",notes:"Tapered seats need less torque"},{fastener:"12mm thread, gasket seat",location:"Cylinder head",ftlb:"10–18 ft-lb",nm:"14–24 Nm",sequence:"N/A",notes:""}],sequence_desc:null,warnings:["Over-torquing a spark plug in an aluminum head strips the threads — a very expensive repair","Let the engine cool COMPLETELY before removing plugs from aluminum heads","Under-torquing causes the plug to back out or leak combustion gases"],thread_info:"Common threads: 14mm x 1.25, 12mm x 1.25. Check your plug box for exact torque.",mistakes:["Cross-threading — always start by hand, never with a ratchet","Over-torquing (very common and destroys head threads)","Removing plugs from a hot aluminum head"],wrench:"3/8\" drive click-type torque wrench, 5–50 ft-lb range"},
-  "oil drain plug":{component:"Oil Drain Plug",vehicle_note:"Generic ranges. Always verify your specific vehicle — some use single-use crush washers.",specs:[{fastener:"Steel plug, aluminum pan",location:"Oil pan",ftlb:"18–30 ft-lb",nm:"24–41 Nm",sequence:"N/A",notes:"Always use new crush washer"},{fastener:"Steel plug, steel pan",location:"Oil pan",ftlb:"25–35 ft-lb",nm:"34–47 Nm",sequence:"N/A",notes:""},{fastener:"Aluminum crush-washer plug",location:"Oil pan",ftlb:"22–30 ft-lb",nm:"30–41 Nm",sequence:"N/A",notes:"Replace crush washer every time"}],sequence_desc:null,warnings:["Always use a new crush washer every oil change if your vehicle requires one","Over-torquing strips aluminum pan threads — a very expensive repair","If threads are damaged, use a drain plug repair kit or replace the pan"],thread_info:"Common: M12 x 1.5, M14 x 1.5, 1/2-20 UNF. Check your owner's manual.",mistakes:["Reusing old crush washers — causes slow leaks","Over-torquing the plug","Cross-threading (always start by hand)","Using an impact gun"],wrench:"3/8\" drive click-type torque wrench, 10–50 ft-lb range"},
-  "brake caliper bolts":{component:"Brake Caliper Bolts",vehicle_note:"Varies significantly by vehicle. VERIFY with your service manual before doing brake work.",specs:[{fastener:"Caliper slide/guide pin bolts",location:"Caliper to bracket",ftlb:"25–45 ft-lb",nm:"34–61 Nm",sequence:"N/A",notes:"Clean and lube pins"},{fastener:"Caliper bracket to knuckle (front)",location:"Knuckle / spindle",ftlb:"70–120 ft-lb",nm:"95–163 Nm",sequence:"N/A",notes:"Often requires thread-locker"},{fastener:"Caliper bracket to knuckle (rear)",location:"Rear knuckle",ftlb:"40–80 ft-lb",nm:"54–108 Nm",sequence:"N/A",notes:""}],sequence_desc:null,warnings:["Loose caliper bolts can cause catastrophic brake failure — do not skip torquing","Many caliper bolts use thread-locker from the factory — clean and reapply if specified","Some bracket bolts are torque-to-yield (TTY) and must be replaced","Always bleed brakes after caliper removal"],thread_info:"Slide pins are usually M9–M12. Bracket bolts are typically M12–M16.",mistakes:["Forgetting thread-locker on bolts that require it","Not cleaning old thread-locker before reapplying","Reusing TTY bolts","Not retracting caliper piston before installing new pads"],wrench:"3/8\" or 1/2\" drive torque wrench, 20–120 ft-lb range"},
-  "cylinder head bolts":{component:"Cylinder Head Bolts",vehicle_note:"CRITICAL — you MUST use the factory service manual for your specific engine. These values are approximate only.",specs:[{fastener:"Head bolts — typical 4-cyl (TTY)",location:"Cylinder head",ftlb:"See manual (multi-stage)",nm:"See manual",sequence:"Inside-out spiral",notes:"Replace TTY bolts every time"},{fastener:"Head bolts — typical V6/V8 (TTY)",location:"Cylinder head",ftlb:"See manual (multi-stage)",nm:"See manual",sequence:"Inside-out spiral",notes:"Replace TTY bolts every time"},{fastener:"Head bolts — older non-TTY engines",location:"Cylinder head",ftlb:"65–80 ft-lb",nm:"88–108 Nm",sequence:"Inside-out spiral",notes:"Can reuse if not stretched"}],sequence_desc:"Cylinder head bolts follow a SPECIFIC sequence starting from the center and spiraling outward. NEVER work around the head in a circle. Wrong sequence = blown head gasket within weeks.",warnings:["ALWAYS use the factory service manual for your specific engine — these specs are approximate","TTY (torque-to-yield) head bolts are SINGLE USE — replace every single time","Wrong torque sequence = warped head or blown gasket","Debris in blind bolt holes gives false torque readings — clean the holes"],thread_info:"Commonly M10, M11, or M12. Many modern engines use stretch bolts.",mistakes:["Reusing TTY bolts — this is catastrophic","Using the wrong torque sequence","Debris in bolt holes causing false torque readings","Skipping torque-angle stage on TTY bolts"],wrench:"1/2\" drive torque wrench (0–150 ft-lb) plus a torque angle gauge"},
-  "valve cover bolts":{component:"Valve Cover Bolts",vehicle_note:"Light torque — these bolts only compress a gasket. Over-torquing is the #1 mistake.",specs:[{fastener:"Plastic valve cover (modern engines)",location:"Cylinder head",ftlb:"6–9 ft-lb",nm:"8–12 Nm",sequence:"Center-out",notes:"Plastic cracks easily — stay at low end"},{fastener:"Aluminum valve cover",location:"Cylinder head",ftlb:"8–12 ft-lb",nm:"11–16 Nm",sequence:"Center-out",notes:""},{fastener:"Stamped steel valve cover (older)",location:"Cylinder head",ftlb:"4–7 ft-lb",nm:"5–9 Nm",sequence:"Center-out",notes:""}],sequence_desc:"Start at the center bolts and work outward in a spiral or criss-cross pattern.",warnings:["Plastic covers crack easily — STAY at the low end of the spec range","Always use a new gasket unless it is specifically designed to be reused","Don't overtighten — leaks come from CRUSHED gaskets, not loose bolts","Replace any cracked rubber grommets/spacers"],thread_info:"Typically M6 or 1/4\" bolts.",mistakes:["Over-torquing and cracking the plastic cover","Not following a torque sequence — causes leaks","Reusing old hardened rubber grommets"],wrench:"1/4\" drive torque wrench or inch-pound wrench (5–25 ft-lb range)"},
-  "axle nut":{component:"Axle Nut / Hub Nut",vehicle_note:"CRITICAL safety component. Wrong torque destroys wheel bearings quickly. Verify your exact spec.",specs:[{fastener:"Front axle nut (most cars)",location:"Wheel hub",ftlb:"150–200 ft-lb",nm:"203–271 Nm",sequence:"N/A",notes:"Must stake or cotter pin after torquing"},{fastener:"Front axle nut (heavy trucks/SUVs)",location:"Wheel hub",ftlb:"200–250 ft-lb",nm:"271–339 Nm",sequence:"N/A",notes:""},{fastener:"Rear axle nut (FWD with solid rear)",location:"Rear hub",ftlb:"130–175 ft-lb",nm:"176–237 Nm",sequence:"N/A",notes:""}],sequence_desc:null,warnings:["CRITICAL safety component — wrong torque destroys wheel bearings quickly","Many axle nuts are SINGLE-USE — replace with new nut each time","Must stake or install cotter pin after torquing — do not skip","NEVER use an impact gun for final torque","You MUST lower the vehicle with wheel on ground before final torque, or use a helper to hold the brakes"],thread_info:"Typically M22, M24, or larger. Often has a staking collar that must be deformed after torquing.",mistakes:["Reusing a stake-type axle nut (must be replaced)","Torquing with wheel off the ground — wheel spins, giving false torque","Skipping the cotter pin or stake","Using an impact for final torque"],wrench:"1/2\" or 3/4\" drive torque wrench capable of 250+ ft-lb"},
+const TORQUE_DATABASE = {
+"lug nuts": { component:"Lug Nuts / Wheel Bolts", vehicle_note:"ALWAYS verify with your own
+"spark plugs": { component:"Spark Plugs", vehicle_note:"Torque varies by plug type and cyli
+"oil drain plug": { component:"Oil Drain Plug", vehicle_note:"Generic ranges. Check your sp
 };
-
-const FLUID_DB = {
-  "honda civic":{vehicle:"Honda Civic (various years)",engine_note:"Common engines: 1.5L turbo (2016+), 1.8L (2006–2015), 2.0L (Sport/Si). Verify for your specific year.",fluids:[{system:"Engine Oil (1.5L turbo)",capacity:"3.7 qt (3.5 L) with filter",spec:"Honda 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"5,000–7,500 mi",notes:""},{system:"Engine Oil (1.8L)",capacity:"3.9 qt (3.7 L) with filter",spec:"Honda 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"7,500 mi",notes:""},{system:"Engine Oil (2.0L)",capacity:"4.4 qt (4.2 L) with filter",spec:"Honda 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"7,500 mi",notes:""},{system:"Coolant",capacity:"4.7 qt (4.4 L)",spec:"Honda Type 2 (blue)",grade:"—",type:"Pre-mixed",interval:"Every 5 years",notes:""},{system:"CVT Transmission Fluid",capacity:"3.7 qt drain & fill",spec:"Honda CVT Fluid HCF-2",grade:"—",type:"CVT Specific",interval:"30,000 mi",notes:"Honda-specific ONLY"},{system:"Brake Fluid",capacity:"Fill to MAX line",spec:"DOT 3",grade:"—",type:"DOT 3",interval:"Every 3 years",notes:""}],drain_torque:"Engine: 29 ft-lb (39 Nm) — use new crush washer every time",filter:"Honda P/N 15400-PLM-A02 or equivalent. Cartridge-style on some years.",tips:["Use ONLY Honda-specific CVT fluid — no substitutes","Replace oil drain plug crush washer at every oil change","0W-20 is required for warranty compliance"],warning:"1.5L turbo engines have a documented oil dilution issue in cold climates (fuel mixing into oil) — check oil level monthly and shorten oil change intervals in winter."},
-  "toyota camry":{vehicle:"Toyota Camry (various years)",engine_note:"Common engines: 2.5L 4-cyl (A25A-FKS), 3.5L V6, 2.5L Hybrid. Verify for your year.",fluids:[{system:"Engine Oil (2.5L 4-cyl)",capacity:"4.6 qt (4.4 L) with filter",spec:"Toyota 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"10,000 mi",notes:""},{system:"Engine Oil (3.5L V6)",capacity:"6.4 qt (6.1 L) with filter",spec:"Toyota 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"10,000 mi",notes:""},{system:"Coolant (SLLC)",capacity:"6.4 qt (6.1 L)",spec:"Toyota Super Long Life (pink)",grade:"—",type:"SLLC",interval:"100,000 mi then every 50k",notes:"Pink ONLY — do not mix colors"},{system:"Automatic Transmission Fluid",capacity:"3.8 qt drain & fill",spec:"Toyota WS ATF",grade:"—",type:"ATF",interval:"60,000 mi recommended",notes:""},{system:"Brake Fluid",capacity:"Fill to MAX",spec:"DOT 3",grade:"—",type:"DOT 3",interval:"Every 3 years",notes:""}],drain_torque:"Engine: 30 ft-lb (40 Nm) — use new gasket",filter:"Cartridge-style oil filter — include new o-ring seal with each change.",tips:["Toyota WS ATF is labeled 'lifetime' but many techs recommend changing at 60–100k miles","Use only Toyota SLLC pink coolant — never mix with other colors","0W-20 is the spec — do not substitute heavier oil"],warning:"Hybrid models have separate inverter coolant — do not mix with engine coolant. Service intervals are different."},
-  "ford f-150":{vehicle:"Ford F-150 (various years)",engine_note:"Common engines: 2.7L EcoBoost V6, 3.5L EcoBoost V6, 5.0L Coyote V8, 3.3L V6. Verify for your year.",fluids:[{system:"Engine Oil (3.5L EcoBoost)",capacity:"6.0 qt (5.7 L) with filter",spec:"Motorcraft 5W-30",grade:"5W-30",type:"Full Synthetic",interval:"10,000 mi",notes:""},{system:"Engine Oil (5.0L V8)",capacity:"8.8 qt (8.3 L) with filter",spec:"Motorcraft 5W-20",grade:"5W-20",type:"Full Synthetic",interval:"10,000 mi",notes:""},{system:"Engine Oil (2.7L EcoBoost)",capacity:"6.0 qt (5.7 L) with filter",spec:"Motorcraft 5W-30",grade:"5W-30",type:"Full Synthetic",interval:"10,000 mi",notes:""},{system:"Coolant",capacity:"16–20 qt total (varies by engine)",spec:"Motorcraft Orange OAT",grade:"—",type:"OAT",interval:"Every 5 years",notes:""},{system:"10-speed Automatic",capacity:"12.1 qt total / ~5 qt drain & fill",spec:"Mercon ULV",grade:"—",type:"ATF",interval:"150,000 mi (change earlier under towing)",notes:"Mercon ULV ONLY"},{system:"Rear Differential",capacity:"~3 qt",spec:"Motorcraft 75W-85 or 75W-140 (towing)",grade:"75W-85",type:"Gear Oil",interval:"150,000 mi / 30,000 mi severe",notes:""},{system:"Brake Fluid",capacity:"Fill to MAX",spec:"DOT 3 / DOT 4",grade:"—",type:"DOT 3",interval:"Every 3 years",notes:""}],drain_torque:"Engine: 20 ft-lb (27 Nm) — use new gasket",filter:"FL-500S oil filter on most EcoBoost and 5.0L engines. Spin-on canister.",tips:["10-speed transmissions are extremely sensitive to fluid — Mercon ULV ONLY, no substitutes","EcoBoost engines benefit from more frequent oil changes (5,000 mi) under towing or severe duty","Check front differential fluid on 4WD models — commonly overlooked"],warning:"EcoBoost engines can suffer from carbon buildup on intake valves due to direct injection. Walnut blasting at ~100k miles is recommended."},
-  "chevrolet silverado":{vehicle:"Chevrolet Silverado 1500 (various years)",engine_note:"Common engines: 5.3L V8 (L82/L84), 6.2L V8 (L87), 2.7L Turbo 4-cyl.",fluids:[{system:"Engine Oil (5.3L V8)",capacity:"8.0 qt (7.6 L) with filter",spec:"GM dexos1 Gen 2 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"7,500–10,000 mi",notes:""},{system:"Engine Oil (6.2L V8)",capacity:"8.0 qt (7.6 L) with filter",spec:"GM dexos1 Gen 2 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"7,500–10,000 mi",notes:""},{system:"Coolant (Dex-Cool)",capacity:"~13 qt total",spec:"GM Dex-Cool (orange)",grade:"—",type:"OAT",interval:"Every 5 years / 150k mi",notes:"Orange ONLY"},{system:"8/10-speed Automatic",capacity:"Total ~11 qt / drain & fill ~5 qt",spec:"GM DEXRON-HP",grade:"—",type:"ATF",interval:"45k mi severe / 97,500 mi normal",notes:""},{system:"Rear Differential",capacity:"~3 qt",spec:"GM 75W-90 Synthetic",grade:"75W-90",type:"Gear Oil",interval:"150,000 mi / 30,000 mi off-road",notes:""},{system:"Brake Fluid",capacity:"Fill to MAX",spec:"DOT 3",grade:"—",type:"DOT 3",interval:"Every 3 years",notes:""}],drain_torque:"Engine: 18 ft-lb (25 Nm)",filter:"ACDelco PF48 (5.3L) or PF64 (6.2L). Verify for your engine.",tips:["AFM/DFM cylinder deactivation systems benefit from more frequent oil changes (5,000 mi)","Use dexos1 Gen 2 certified oil only","Transfer case and front diff on 4WD need service too — don't forget them"],warning:"5.3L and 6.2L engines with AFM (Active Fuel Management) have documented lifter failure issues. Using fresh correct-weight oil and shorter change intervals helps. Many owners install AFM disablers."},
-  "toyota rav4":{vehicle:"Toyota RAV4 (various years)",engine_note:"Common engines: 2.5L 4-cyl (A25A-FKS, 2019+), 2.5L Hybrid. Verify for your year.",fluids:[{system:"Engine Oil (2.5L)",capacity:"4.8 qt (4.5 L) with filter",spec:"Toyota 0W-16",grade:"0W-16",type:"Full Synthetic",interval:"10,000 mi",notes:"0W-16 required on newer models"},{system:"Coolant",capacity:"6.0 qt (5.7 L)",spec:"Toyota SLLC (pink)",grade:"—",type:"SLLC",interval:"100,000 mi then every 50k",notes:""},{system:"Automatic Transmission Fluid",capacity:"~3.5 qt drain & fill",spec:"Toyota WS ATF",grade:"—",type:"ATF",interval:"60,000 mi recommended",notes:""},{system:"Transfer Case (AWD)",capacity:"~0.6 qt",spec:"Toyota Genuine ATF WS",grade:"—",type:"ATF",interval:"60,000 mi",notes:""},{system:"Rear Differential (AWD)",capacity:"~0.6 qt",spec:"Toyota 75W-85",grade:"75W-85",type:"Gear Oil",interval:"60,000 mi",notes:""}],drain_torque:"Engine: 30 ft-lb (40 Nm) with new gasket",filter:"Cartridge-style filter — include new o-ring seal each change.",tips:["Newer RAV4s use 0W-16 for fuel economy — do not substitute heavier weight","AWD models have transfer case and rear diff — don't skip them","Hybrid models have separate inverter coolant"],warning:"Hybrid models require different maintenance — the eCVT transaxle fluid is separate from regular ATF. Do not confuse them."},
-  "jeep wrangler":{vehicle:"Jeep Wrangler (various years)",engine_note:"Common engines: 3.6L Pentastar V6, 2.0L Turbo 4-cyl (2018+), 3.0L EcoDiesel, 4.0L inline-6 (older).",fluids:[{system:"Engine Oil (3.6L Pentastar)",capacity:"6.0 qt (5.7 L) with filter",spec:"Mopar 0W-20 or 5W-20",grade:"0W-20",type:"Full Synthetic",interval:"10,000 mi",notes:""},{system:"Coolant",capacity:"~10 qt",spec:"Mopar OAT (MS-12106)",grade:"—",type:"OAT",interval:"Every 5 years",notes:""},{system:"8-speed Automatic (8HP70)",capacity:"Total ~9 qt / drain & fill ~4 qt",spec:"ZF approved ATF",grade:"—",type:"ATF",interval:"Check level; change if dirty",notes:"ZF-approved fluid ONLY"},{system:"Transfer Case",capacity:"~1.5 qt",spec:"Mopar ATF+4",grade:"—",type:"ATF",interval:"30k mi off-road / 60k mi street",notes:""},{system:"Front Differential (Dana 30/44)",capacity:"~1.5 qt",spec:"75W-85 or 75W-90",grade:"75W-90",type:"Gear Oil",interval:"30k mi off-road / 60k mi street",notes:""},{system:"Rear Differential (Dana 44)",capacity:"~2.5 qt",spec:"75W-90 Synthetic",grade:"75W-90",type:"Gear Oil",interval:"30k mi off-road / 60k mi street",notes:""}],drain_torque:"Engine: 20 ft-lb (27 Nm)",filter:"Mopar MO-349 on 3.6L Pentastar.",tips:["Check axle fluids after every water crossing — water contamination is very common off-road","8HP transmission is sensitive — use only ZF-approved fluid","Tighten soft-top hardware and body bolts every few months"],warning:"Off-roading owners should service all axle and transfer case fluids significantly more frequently — every 15,000 miles or after any deep water crossings."},
-  "honda accord":{vehicle:"Honda Accord (various years)",engine_note:"Common engines: 1.5L turbo (2018+), 2.0L turbo (Sport 2.0T), 2.4L (2013–2017), 3.5L V6 (older).",fluids:[{system:"Engine Oil (1.5L turbo)",capacity:"3.7 qt (3.5 L) with filter",spec:"Honda 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"7,500 mi",notes:""},{system:"Engine Oil (2.0L turbo)",capacity:"5.2 qt (4.9 L) with filter",spec:"Honda 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"10,000 mi",notes:""},{system:"Coolant",capacity:"4.8 qt (4.5 L)",spec:"Honda Type 2 (blue)",grade:"—",type:"Pre-mixed",interval:"Every 5 years",notes:""},{system:"CVT (1.5T)",capacity:"~3.7 qt drain & fill",spec:"Honda CVT Fluid HCF-2",grade:"—",type:"CVT Specific",interval:"30,000 mi",notes:"Honda-specific ONLY"},{system:"10-speed Automatic (2.0T)",capacity:"~3.5 qt drain & fill",spec:"Honda ATF 3.1",grade:"—",type:"ATF",interval:"30,000 mi",notes:""},{system:"Brake Fluid",capacity:"Fill to MAX",spec:"DOT 3",grade:"—",type:"DOT 3",interval:"Every 3 years",notes:""}],drain_torque:"Engine: 30 ft-lb (40 Nm) with new crush washer",filter:"Honda P/N 15400-PLM-A02 or equivalent.",tips:["1.5L turbo has documented oil dilution issue — check oil level monthly","Do not substitute generic ATF for Honda ATF 3.1","Brake fluid flush every 3 years prevents expensive ABS module issues"],warning:"1.5L turbo models in cold climates can experience fuel diluting into the oil. Check the oil level and smell — if it smells like gasoline, change the oil immediately and shorten intervals."},
-  "subaru outback":{vehicle:"Subaru Outback (various years)",engine_note:"Common engines: 2.5L FB25 boxer (2010–2019), 2.4L turbo (2020+), 3.6R H6.",fluids:[{system:"Engine Oil (2.5L FB25)",capacity:"5.1 qt (4.8 L) with filter",spec:"Subaru 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"6,000 mi",notes:"Check level MONTHLY"},{system:"Engine Oil (2.4L turbo)",capacity:"5.2 qt (4.9 L) with filter",spec:"Subaru 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"6,000 mi",notes:""},{system:"Coolant",capacity:"6.7 qt (6.3 L)",spec:"Subaru Super Coolant",grade:"—",type:"HOAT",interval:"Every 3 years / 30k mi",notes:""},{system:"CVT Fluid",capacity:"~3 qt drain & fill",spec:"Subaru CVTF-II or High Torque",grade:"—",type:"CVT Specific",interval:"30,000 mi",notes:"Subaru-specific ONLY"},{system:"Rear Differential",capacity:"~1.5 qt",spec:"75W-90 GL-5",grade:"75W-90",type:"Gear Oil",interval:"30,000 mi",notes:""},{system:"Brake Fluid",capacity:"Fill to MAX",spec:"DOT 3",grade:"—",type:"DOT 3",interval:"Every 3 years",notes:""}],drain_torque:"Engine: 32 ft-lb (44 Nm) with new crush washer",filter:"Subaru OEM filter or equivalent. Boxer engine layout requires care — some filters need a special removal tool.",tips:["CHECK OIL LEVEL MONTHLY — FB25 engines are known oil consumers","CVT requires Subaru-specific fluid — no substitutes ever","Add Subaru Cooling System Conditioner to help prevent head gasket seepage on older models"],warning:"2011–2014 Outbacks with the FB25 engine have documented oil consumption issues — some consume 1 qt per 1,000–3,000 miles. Always check before long trips. Also check coolant for any oily residue which indicates head gasket seepage."},
-  "nissan altima":{vehicle:"Nissan Altima (various years)",engine_note:"Common engines: 2.5L 4-cyl (QR25DE / PR25DD), 2.0L VC-Turbo (2019+), 3.5L V6 (older).",fluids:[{system:"Engine Oil (2.5L)",capacity:"4.8 qt (4.5 L) with filter",spec:"Nissan 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"5,000 mi",notes:""},{system:"Engine Oil (2.0L VC-Turbo)",capacity:"4.8 qt (4.5 L) with filter",spec:"Nissan 0W-20",grade:"0W-20",type:"Full Synthetic",interval:"5,000 mi",notes:""},{system:"Coolant",capacity:"~8 qt total",spec:"Nissan Long Life (blue-green)",grade:"—",type:"HOAT",interval:"Every 5 years",notes:""},{system:"CVT Fluid (XTronic)",capacity:"~5 qt total / ~3.5 qt drain & fill",spec:"Nissan NS-3",grade:"—",type:"CVT Specific",interval:"30,000 mi — do not skip",notes:"NS-3 ONLY"},{system:"Brake Fluid",capacity:"Fill to MAX",spec:"DOT 3",grade:"—",type:"DOT 3",interval:"Every 3 years",notes:""}],drain_torque:"Engine: 25 ft-lb (34 Nm) with new gasket",filter:"Nissan 15208-9E01A or equivalent.",tips:["Change CVT fluid every 30k miles regardless of any 'lifetime' claim — it dramatically extends CVT life","Watch for CVT symptoms: shuddering at 30–50 mph, whining, slipping — catch it early","Keep cooling system healthy — CVTs are sensitive to heat"],warning:"Nissan CVTs (JATCO units) have well-documented failures at 60–120k miles when fluid is neglected. Nissan extended the warranty on many 2013–2018 CVT-equipped vehicles. Change the fluid on schedule — it is cheap insurance."},
+const FLUID_DATABASE = {
+"honda civic": { vehicle:"Honda Civic", engine_note:"Capacities vary by engine. Common engi
+"toyota camry": { vehicle:"Toyota Camry", engine_note:"Common engines: 2.5L 4-cyl, 3.5L V6,
+"ford f-150": { vehicle:"Ford F-150", engine_note:"Common engines: 2.7L EcoBoost V6, 3.5L E
 };
-
-const COMPLAINT_DB = [
-  {match:{make:"Toyota",model:"Corolla",year_min:2009,year_max:2013,keywords:["a/c","ac","air conditioning","blows warm","not cold","warm air","no cold"]},complaint_summary:"A/C on a 2009–2013 Toyota Corolla blowing warm air. This generation has several known A/C failure points that are cheap to fix.",likely_causes:["Low refrigerant charge — #1 cause. Systems leak slowly over 5–10 years.","A/C compressor clutch not engaging","Failed A/C pressure switch — known failure on this generation ($15–30 part)","Blown A/C fuse","Failed compressor (less common, high mileage)"],diagnosis_steps:["With engine running and A/C on MAX, look at the A/C compressor under the hood. The center part (clutch) should be spinning. If it's NOT spinning, the electrical side isn't working.","If clutch isn't engaging: check the A/C fuse first (under-hood fuse box, typically 10A labeled HTR or A/C).","Swap the A/C relay with an identical relay from the same fuse box.","Check refrigerant pressure with a gauge — low-side should be 25–45 psi at idle.","If clutch IS engaging but air is still warm: suspect low refrigerant charge."],corrections:[{fix:"Recharge refrigerant (R-134a)",detail:"Uses 1.3–1.5 lbs (21–24 oz). DIY recharge kits available at auto parts stores for ~$30–50.",difficulty:"Easy",est_cost:"$30–80"},{fix:"Replace A/C pressure switch",detail:"Known failure on 2009–2013 Corolla. Located on the receiver/drier. ~$15–30 part.",difficulty:"Easy",est_cost:"$15–30"},{fix:"Replace A/C relay",detail:"Swap-test first — takes 30 seconds. If clutch now works, the relay was bad. ~$15.",difficulty:"Easy",est_cost:"$15"},{fix:"Replace A/C compressor",detail:"Only if compressor is seized or internally damaged. Confirm clutch coil and electrical are good first.",difficulty:"Hard",est_cost:"$300–800"}],tech_notes:"Toyota TSB T-SB-0075-10 covers A/C performance complaints on this generation.",safety_warning:null},
-  {match:{keywords:["a/c","ac","air conditioning"],and_keywords:["blows warm","not cold","warm air","no cold air","not blowing cold","warm","hot air"]},complaint_summary:"A/C blowing warm air. Almost always refrigerant-related or electrical (fuse, relay, pressure switch).",likely_causes:["Low refrigerant charge (most common by far — systems leak slowly over years)","A/C compressor clutch not engaging","Failed A/C pressure switch or sensor","Blown A/C fuse or failed relay","Failed expansion valve or orifice tube","Leaking condenser from road debris"],diagnosis_steps:["With engine running and A/C on MAX, check the compressor under the hood. The center clutch should be spinning. If not, the electrical side is the problem.","Check A/C fuse in the under-hood fuse box first — it's free to check.","Swap the A/C relay with an identical one from the same fuse box.","If clutch IS engaging, measure low-side pressure with a gauge. Should be 25–45 psi at idle.","Feel the large A/C line — should be COLD and sweating with moisture."],corrections:[{fix:"Recharge with correct refrigerant",detail:"Check underhood sticker for R-134a or R-1234yf. Use the correct type.",difficulty:"Easy",est_cost:"$30–80 DIY"},{fix:"Replace A/C pressure switch",detail:"Common failure on many vehicles. Usually $15–50 part.",difficulty:"Easy",est_cost:"$15–50"},{fix:"Replace A/C fuse or relay",detail:"Check the under-hood fuse box for A/C fuse and relay.",difficulty:"Easy",est_cost:"$5–15"},{fix:"Find and fix refrigerant leak, then recharge",detail:"If you recharge and it's empty again within weeks, you have a leak. UV dye or electronic leak detector.",difficulty:"Medium",est_cost:"$50–300"}],tech_notes:"R-134a system: healthy pressures at idle are roughly 25–45 psi low-side / 200–250 psi high-side.",safety_warning:"NEVER open a high-side A/C fitting — pressure is 200+ psi and refrigerant causes instant frostbite."},
-  {match:{make:"Ford",keywords:["misfire","rough idle","rough running","engine shake","bucking","cylinder misfire"],year_min:2004,year_max:2010,models:["F-150","Expedition","Mustang"]},complaint_summary:"Misfire or rough running on a 2004–2010 Ford with the 5.4L 3-valve engine. This engine is notorious for two specific failure points: spark plug blowout and cam phaser rattle.",likely_causes:["Worn spark plugs — the OEM 2-piece plug design breaks during removal","Failed coil-on-plug (COP) ignition coil — very common on 5.4L 3V","Cam phaser failure (loud startup rattle + misfire)","Broken spark plug stuck in cylinder head from previous attempt"],diagnosis_steps:["Pull codes — P0301–P0308 identify specific cylinders.","Swap the coil from the misfiring cylinder to a known-good cylinder. If the code follows, replace the coil.","Check coil boots for carbon tracking (black lines on the boot) — indicates arcing.","When inspecting plugs: let the engine cool COMPLETELY. Spray penetrating oil into each plug hole and wait 15 minutes before removal. This engine breaks plugs frequently when removed hot.","Listen for cam phaser rattle — a loud metallic ticking on cold startup lasting 5–30 seconds."],corrections:[{fix:"Replace all spark plugs using correct procedure",detail:"Use Motorcraft SP-546. Engine must be COLD. Soak threads with penetrating oil first. Broken plug extraction requires a special kit.",difficulty:"Medium",est_cost:"$40–100 parts"},{fix:"Replace ignition coils",detail:"Motorcraft DG-511 is the OEM coil. $30–50 each. Replace any with carbon tracking.",difficulty:"Easy",est_cost:"$30–50 each"},{fix:"Replace cam phasers + VCT solenoids",detail:"Major job requiring timing chain removal. Usually $800–1,500 at a shop.",difficulty:"Hard",est_cost:"$800–1,500"}],tech_notes:"Ford TSB 08-7-6 covers the cam phaser rattle. TSB 08-1-8 covers the spark plug removal procedure — read it before touching those plugs.",safety_warning:null},
-  {match:{make:"Chevrolet",keywords:["lifter tick","lifter noise","ticking","tick","misfire","rough","engine noise"],year_min:2007,year_max:2019,models:["Silverado","Tahoe","Suburban"]},complaint_summary:"Lifter tick, ticking noise, or misfire on a GM 5.3L or 6.2L V8 with Active Fuel Management (AFM). This is one of GM's most documented issues.",likely_causes:["Collapsed AFM lifter — the #1 cause on these engines","Failed AFM lifter oil manifold (controls oil pressure to lifters)","Low oil pressure causing lifter bleed-down","Sticking AFM solenoid in oil pan","Collapsed pushrod (after lifter failure)"],diagnosis_steps:["Listen for ticking that increases with RPM — confirms it's valvetrain.","Pull codes — often P0300 with specific cylinder misfire codes on AFM cylinders (cylinders 1, 4, 6, 7 on most 5.3L engines).","Check oil pressure with a mechanical gauge (should be 25+ psi at idle hot).","Pull valve covers and inspect pushrods — bent pushrod confirms lifter failure on that cylinder."],corrections:[{fix:"Replace all AFM lifters and disable AFM",detail:"Best long-term fix. Replace all 16 lifters and install a Range AFM Disabler or tune to disable cylinder deactivation permanently.",difficulty:"Hard",est_cost:"$1,500–3,000 shop"},{fix:"Temporary: AFM disabler device",detail:"Plug-in device ($80–150) disables cylinder deactivation and can slow further lifter damage while saving for the full repair.",difficulty:"Easy",est_cost:"$80–150"},{fix:"Replace bent pushrods",detail:"Done alongside lifter replacement. Inspect all 16 — any bent pushrod means the lifter on that cylinder also failed.",difficulty:"Hard",est_cost:"Part of lifter job"}],tech_notes:"GM TSB 18-NA-355 acknowledges the AFM lifter issue. The permanent fix is replacing lifters with updated parts and disabling AFM.",safety_warning:null},
-  {match:{keywords:["misfire","rough idle","engine shake","rough running","stumble","bucking","rough","shaking"]},complaint_summary:"Engine misfire or rough idle — the engine isn't burning fuel correctly in one or more cylinders.",likely_causes:["Worn or fouled spark plugs (most common cause)","Failed ignition coil (coil-on-plug systems)","Vacuum leak (intake gasket, PCV valve, brake booster hose)","Clogged fuel injector","Low fuel pressure","Low compression (worn rings or burnt valve)"],diagnosis_steps:["Scan for codes first. P0300 = random multi-cylinder misfire. P0301–P0312 = specific cylinder. The specific code tells you exactly where to look.","Pull the spark plug from the suspected cylinder and inspect it — black/sooty = rich, white/chalky = lean, oil fouled = engine wear.","Swap the coil from the misfiring cylinder to an adjacent one. If the misfire code moves to the new cylinder, the coil is bad.","Spray carb cleaner around intake gaskets and vacuum hoses with the engine idling — if RPM changes, you found a vacuum leak.","Check fuel pressure if all ignition components check out."],corrections:[{fix:"Replace spark plugs",detail:"Use OEM-spec plugs, correctly gapped. Don't mix brands or heat ranges.",difficulty:"Easy",est_cost:"$20–80"},{fix:"Replace failing ignition coil",detail:"Swap-test confirms which one. $20–80 each.",difficulty:"Easy",est_cost:"$20–80"},{fix:"Fix vacuum leak",detail:"Intake manifold gasket, PCV valve, vacuum hoses, or brake booster.",difficulty:"Medium",est_cost:"$10–150"},{fix:"Clean or replace fuel injectors",detail:"Start with a quality fuel system cleaner additive. If that doesn't help, test and replace individually.",difficulty:"Medium",est_cost:"$30–150 per injector"}],tech_notes:"A FLASHING check engine light during a misfire means unburnt fuel is being dumped into the catalytic converter and destroying it. Do not keep driving.",safety_warning:"FLASHING check engine light = pull over safely as soon as possible. Continuing to drive will destroy your catalytic converter ($500–2,500)."},
-  {match:{keywords:["won't start","wont start","no start","cranks no start","won't crank","dead","not starting","doesn't start","click","clicking","won't turn over"]},complaint_summary:"Vehicle won't start. The key is figuring out which of three scenarios you have: (1) No crank at all, (2) Click only, (3) Cranks but won't fire.",likely_causes:["Dead or weak battery — the #1 cause of all no-start conditions","Corroded or loose battery terminals","Failed starter motor (click but no crank)","Bad starter relay or fusible link","Failed crankshaft position sensor (cranks but won't fire)","Failed fuel pump (cranks but no fuel)","Anti-theft/security system lockout"],diagnosis_steps:["Turn the key. What happens? Nothing at all → dead battery. Single loud click → starter. Rapid clicking → weak battery. Engine cranks (rrrr-rrrr) but won't fire → ignition or fuel problem.","Check battery voltage with a multimeter: 12.4V+ = good, below 12V = dead. Try jump-starting first.","If it starts after a jump: the battery is bad. Have it load-tested at any parts store (free).","If it clicks but won't crank after a jump: the starter motor is bad.","If it cranks normally but won't start: check for spark (pull a plug wire, ground it to the engine, crank — look for spark). Then check for fuel (listen for the pump priming sound when you turn the key to ON — 2-second whine from the fuel tank)."],corrections:[{fix:"Jump-start and replace battery",detail:"If the car starts with a jump, the battery is almost certainly the issue — especially if over 4 years old.",difficulty:"Easy",est_cost:"$100–200"},{fix:"Clean battery terminals",detail:"Disconnect negative first. Baking soda + water cleans corrosion. Green/white buildup = bad connection.",difficulty:"Easy",est_cost:"Free"},{fix:"Replace starter motor",detail:"If battery is good but still just clicks.",difficulty:"Medium",est_cost:"$150–400"},{fix:"Replace crankshaft position sensor",detail:"Very common cause of 'cranks normally but won't start.' $30–100 part.",difficulty:"Medium",est_cost:"$30–100"},{fix:"Replace fuel pump",detail:"If no fuel pump priming sound when key is turned to ON.",difficulty:"Medium",est_cost:"$200–600"}],tech_notes:"The single most common no-start diagnosis mistake is skipping the battery test and assuming it's the starter or fuel pump.",safety_warning:null},
-  {match:{keywords:["brake squeal","brake squealing","squealing brakes","brake noise","brakes squeaking","squeaky brakes","grinding brakes","brake grinding"]},complaint_summary:"Brake squeal, squeaking, or grinding. Squeal is usually a wear indicator or glazing. Grinding means metal-on-metal contact — stop driving immediately if you hear grinding.",likely_causes:["Worn brake pads — the wear indicator tab is designed to squeal as a warning","Glazed brake pads from overheating","Glazed or scored rotors","Dry/sticking caliper slide pins","Rust on rotor surface (goes away after a few stops — normal)","Cheap aftermarket pads (known to squeal even when new)"],diagnosis_steps:["Look at pad thickness through the wheel spokes — pads under 3mm need replacing.","Check rotors for deep grooves, heat spots (blue/black discoloration), or cracks.","Check caliper slide pins — pull the caliper, remove the pins, they should slide smoothly. Dry = sticking caliper.","If squeal only happens in the morning and goes away after the first stop: surface rust from overnight moisture. Normal — no action needed."],corrections:[{fix:"Replace brake pads",detail:"Use quality ceramic pads (Akebono, Bosch QuietCast, Wagner ThermoQuiet). Ceramic pads are significantly quieter.",difficulty:"Easy",est_cost:"$30–80"},{fix:"Resurface or replace rotors",detail:"If rotors are above minimum thickness, resurfacing ($20–30/rotor) works. Replace if below minimum.",difficulty:"Easy",est_cost:"$20–120"},{fix:"Lubricate caliper slide pins",detail:"Pull pins, clean with brake cleaner, apply silicone brake grease. Do not use regular grease.",difficulty:"Easy",est_cost:"Free–$10"},{fix:"Install anti-squeal shims",detail:"Most new pads include shims. Apply brake quiet compound to back of pads.",difficulty:"Easy",est_cost:"Free–$10"}],tech_notes:"True 'warped' rotors are actually rare — what usually happens is brake pad material deposits unevenly on the rotor surface, causing thickness variation and pulsation.",safety_warning:"GRINDING brakes = metal contacting metal. The pads are worn through completely. Do not drive until repaired — you risk brake failure."},
-  {match:{keywords:["overheating","overheats","running hot","temp gauge high","temperature high","getting hot","hot","steam","smoke from hood"]},complaint_summary:"Engine overheating — one of the most damaging things that can happen to an engine. Act immediately.",likely_causes:["Low coolant level (leak somewhere in the system)","Stuck-closed thermostat (coolant can't circulate to radiator)","Failed water pump (not circulating coolant)","Clogged radiator (internal buildup or debris)","Failed electric radiator fan or fan clutch","Blown head gasket (coolant entering combustion chamber)"],diagnosis_steps:["STOP DRIVING and let the engine cool for at least 30 minutes. NEVER open the radiator cap on a hot engine — pressurized coolant at 220°F will cause severe burns.","Once cool, check coolant level in the overflow reservoir AND in the radiator itself.","Look under the car for coolant puddles (green, pink, orange, or clear with sweet smell).","Start the engine cold and watch — does the radiator fan come on when the engine gets hot? Is the upper radiator hose getting warm? (Should get hot when thermostat opens.)","Check for head gasket symptoms: white sweet-smelling exhaust smoke, bubbles in the coolant reservoir, milky oil on dipstick."],corrections:[{fix:"Top off coolant and find the leak",detail:"Use the correct coolant color/type for your vehicle. Do not mix colors.",difficulty:"Easy",est_cost:"$10–20"},{fix:"Replace thermostat",detail:"Cheap and common fix. $15–40 part, 1–2 hour job.",difficulty:"Easy",est_cost:"$15–40"},{fix:"Replace radiator fan or fan clutch",detail:"Electric fans: check fuse and relay first. Fan clutch: grab the fan and try to spin it by hand — too easy to spin = bad clutch.",difficulty:"Medium",est_cost:"$50–300"},{fix:"Replace water pump",detail:"If leaking from the weep hole or bearing is noisy.",difficulty:"Hard",est_cost:"$150–600"},{fix:"Replace head gasket",detail:"Major job. Required if coolant is mixing with oil or white smoke from exhaust.",difficulty:"Hard",est_cost:"$1,000–3,000"}],tech_notes:"Running an engine even briefly past the red line on the temperature gauge can warp the cylinder head — a $500–1,500 machine shop repair on top of the gasket job.",safety_warning:"CRITICAL: Do not open a hot radiator cap. Pressurized coolant at 220°F+ causes severe burns. Wait 30+ minutes after the engine cools."},
-  {match:{keywords:["battery drain","battery dies","battery dead overnight","parasitic draw","battery keeps dying","kills battery","drains battery"]},complaint_summary:"Battery drains overnight or over a few days — called a 'parasitic draw.' Something is staying on and pulling power when the car is off.",likely_causes:["Failing battery that can no longer hold a charge","Failing alternator not fully recharging during driving","Trunk, hood, or glovebox light staying on (switch failed)","Aftermarket electronics wired directly to battery (dashcam, stereo, lights)","A module not going to sleep (infotainment, BCM — common on newer vehicles)","Stuck relay"],diagnosis_steps:["Load-test the battery first at any parts store (free). A battery that can't hold a charge will drain overnight regardless of draw — replace it first.","Test alternator output — should be 13.8–14.7V with engine running. Under 13V = bad alternator.","Test parasitic draw: disconnect the negative battery cable, connect a multimeter set to DC amps in series between the cable and terminal. Over 50mA (0.05A) after 20 minutes is excessive.","While watching the meter, pull fuses one at a time. When the draw drops significantly, that circuit has the problem.","Look up what's on that fuse in the owner's manual and investigate that circuit."],corrections:[{fix:"Replace battery",detail:"If it fails a load test, no amount of troubleshooting will fix the drain — the battery is the problem.",difficulty:"Easy",est_cost:"$100–200"},{fix:"Replace alternator",detail:"If charging voltage is low. $150–400.",difficulty:"Medium",est_cost:"$150–400"},{fix:"Fix the identified circuit",detail:"Depends on what the fuse pull test found. Glove box light, trunk light, aftermarket device, or module.",difficulty:"Easy",est_cost:"$0–100"},{fix:"Install a battery maintainer/tender",detail:"If the vehicle sits for long periods, a $25–50 trickle charger on a timer prevents drain.",difficulty:"Easy",est_cost:"$25–50"}],tech_notes:"Newer vehicles with many electronic modules can take 20–45 minutes for everything to fully 'go to sleep' after you park. Wait that long before measuring parasitic draw, or you'll get a false high reading.",safety_warning:null},
+const COMPLAINT_DATABASE = [
+{ match:{make:"Toyota",model:"Corolla",year_min:2009,year_max:2013,keywords:["a/c","ac","ai
+{ match:{keywords:["misfire","rough idle","engine shake","rough running","stumble","bucking
+{ match:{keywords:["won't start","wont start","no start","cranks but won't start","won't cr
+{ match:{keywords:["battery drain","battery dies","battery dead overnight","parasitic draw"
+{ match:{keywords:["brake squeal","brake squealing","squealing brakes","brake noise","brake
+{ match:{make:"Subaru",keywords:["head gasket","coolant loss","losing coolant","white smoke
+{ match:{keywords:["transmission slipping","trans slipping","slipping","rpm revs but no acc
+{ match:{keywords:["overheating","overheats","running hot","temp gauge high"]}, complaint_s
 ];
-
-// ═══════════════════════════════════════════════════════════════════════
-// SETTINGS / API KEY / AI
-// ═══════════════════════════════════════════════════════════════════════
-
-const API_KEY_STORAGE = 'autorepair_openai_key';
-
-function getApiKey() {
-  return localStorage.getItem(API_KEY_STORAGE) || '';
-}
-
-function hasApiKey() {
-  return !!getApiKey();
-}
-
-function openSettings() {
-  const modal = document.getElementById('settings-modal');
-  const input = document.getElementById('api-key-input');
-  input.value = getApiKey();
-  updateAiStatus();
-  updateCacheInfo();
-  document.getElementById('clear-key-btn').style.display = hasApiKey() ? 'inline-block' : 'none';
-  modal.classList.add('active');
-}
-
-function closeSettings() {
-  document.getElementById('settings-modal').classList.remove('active');
-}
-
-function saveSettings() {
-  const key = document.getElementById('api-key-input').value.trim();
-  if (key) {
-    if (!key.startsWith('sk-')) {
-      alert('That doesn\'t look like an OpenAI key. They start with "sk-..."');
-      return;
-    }
-    localStorage.setItem(API_KEY_STORAGE, key);
-  } else {
-    localStorage.removeItem(API_KEY_STORAGE);
-  }
-  updateSettingsButton();
-  updateAiStatus();
-  closeSettings();
-}
-
-function clearApiKey() {
-  if (!confirm('Remove your saved API key?')) return;
-  localStorage.removeItem(API_KEY_STORAGE);
-  document.getElementById('api-key-input').value = '';
-  updateSettingsButton();
-  updateAiStatus();
-  document.getElementById('clear-key-btn').style.display = 'none';
-}
-
-function clearAiCache() {
-  const cacheKeys = Object.keys(localStorage).filter(k => k.startsWith('ai_cache_'));
-  const count = cacheKeys.length;
-  if (count === 0) { alert('Cache is already empty.'); return; }
-  if (!confirm(`Delete ${count} cached AI answers? (Repeat lookups will hit the API again.)`)) return;
-  cacheKeys.forEach(k => localStorage.removeItem(k));
-  updateCacheInfo();
-  alert(`Cleared ${count} cached answers.`);
-}
-
-function updateCacheInfo() {
-  const el = document.getElementById('cache-info');
-  if (!el) return;
-  const count = Object.keys(localStorage).filter(k => k.startsWith('ai_cache_')).length;
-  el.textContent = count > 0 ? `${count} AI answers cached on this device` : '';
-}
-
-function updateSettingsButton() {
-  const btn = document.getElementById('settings-btn');
-  if (hasApiKey()) {
-    btn.textContent = '⚙ AI ON';
-    btn.classList.add('configured');
-  } else {
-    btn.textContent = '⚙ SETTINGS';
-    btn.classList.remove('configured');
-  }
-}
-
-function updateAiStatus() {
-  const status = document.getElementById('ai-status');
-  if (!status) return;
-  if (hasApiKey()) {
-    status.className = 'ai-status active';
-    status.innerHTML = '<div class="ai-status-label">✓ AI FALLBACK: ACTIVE</div><div class="ai-status-desc">Uncommon queries will use AI when the database has no match.</div>';
-  } else {
-    status.className = 'ai-status inactive';
-    status.innerHTML = '<div class="ai-status-label">◦ AI FALLBACK: DISABLED</div><div class="ai-status-desc">Database lookups still work. Add a key to unlock AI answers for uncommon queries.</div>';
-  }
-}
-
-// ── AI CALL ──────────────────────────────────────────────────────────
-// Proper hash function — DJB2 style. Combined with content length makes collisions astronomically unlikely.
-function hashForCache(str) {
-  let h1 = 5381, h2 = 0;
-  for (let i = 0; i < str.length; i++) {
-    const c = str.charCodeAt(i);
-    h1 = ((h1 << 5) + h1 + c) | 0;
-    h2 = ((h2 * 31) + c) | 0;
-  }
-  // Include length so two different strings that hash the same still differ
-  return str.length.toString(36) + '_' + (h1 >>> 0).toString(36) + '_' + (h2 >>> 0).toString(36);
-}
-
-async function callAI(userPrompt, systemPrompt) {
-  const key = getApiKey();
-  if (!key) throw new Error('NO_KEY');
-
-  // Cache check — uses a collision-resistant hash that encodes the full prompt
-  const cacheKey = 'ai_cache_' + hashForCache(systemPrompt + '\u0001' + userPrompt);
-  const cached = localStorage.getItem(cacheKey);
-  if (cached) {
-    try { return JSON.parse(cached); } catch {}
-  }
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${key}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt + '\n\nReturn ONLY a raw JSON object. No markdown, no commentary, no code fences.' },
-        { role: 'user', content: userPrompt },
-      ],
-      response_format: { type: 'json_object' },
-      max_tokens: 2000,
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    if (response.status === 401) throw new Error('Invalid or expired OpenAI key. Check Settings or generate a new one at platform.openai.com/api-keys.');
-    if (response.status === 429) throw new Error('OpenAI rate limit or quota hit. Check your balance at platform.openai.com/usage.');
-    if (response.status === 402 || errText.includes('insufficient_quota')) throw new Error('Out of OpenAI credits. Add funds at platform.openai.com/billing.');
-    throw new Error(`OpenAI API error (${response.status}): ${errText.slice(0, 150)}`);
-  }
-
-  const data = await response.json();
-  const text = data.choices?.[0]?.message?.content || '';
-  if (!text) throw new Error('Empty AI response');
-
-  const parsed = extractAIJson(text);
-
-  // Cache it (localStorage has ~5MB; cache last 50 entries)
-  try {
-    const cacheKeys = Object.keys(localStorage).filter(k => k.startsWith('ai_cache_'));
-    if (cacheKeys.length > 50) {
-      cacheKeys.slice(0, cacheKeys.length - 40).forEach(k => localStorage.removeItem(k));
-    }
-    localStorage.setItem(cacheKey, JSON.stringify(parsed));
-  } catch {}
-
-  return parsed;
-}
-
-function extractAIJson(text) {
-  try { return JSON.parse(text); } catch {}
-  const cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-  try { return JSON.parse(cleaned); } catch {}
-  const s = cleaned.indexOf('{'), e = cleaned.lastIndexOf('}');
-  if (s !== -1 && e > s) {
-    try { return JSON.parse(cleaned.slice(s, e + 1)); } catch {}
-  }
-  throw new Error('AI returned malformed JSON');
-}
-
-function aiLoadingBox(label) {
-  return `<div style="margin-top:16px;padding:14px 16px;background:#0a0a1a;border:1px solid #1a1a3a;border-radius:3px;display:flex;align-items:center;gap:12px">
-    <div class="ai-spinner"></div>
-    <div>
-      <div style="color:#8080e8;font-family:var(--mono);font-size:11px;letter-spacing:2px">🤖 ASKING AI</div>
-      <div style="color:#666;font-family:var(--sans);font-size:12px;margin-top:2px">${label}</div>
-    </div>
-  </div>`;
-}
-
-function aiErrorBox(msg) {
-  return `<div style="margin-top:16px;padding:14px 16px;background:#1a0000;border:1px solid #3a1010;border-radius:3px">
-    <div style="color:var(--red);font-family:var(--mono);font-size:11px;letter-spacing:2px;margin-bottom:6px">⚠ AI ERROR</div>
-    <div style="color:#ff8080;font-family:var(--sans);font-size:13px;line-height:1.6">${msg}</div>
-  </div>`;
-}
-
-function aiOfferBox(msg) {
-  return `<div style="margin-top:16px;padding:14px 16px;background:#0a0a1a;border:1px solid #1a1a3a;border-radius:3px">
-    <div style="color:#8080e8;font-family:var(--mono);font-size:11px;letter-spacing:2px;margin-bottom:6px">🤖 AI AVAILABLE</div>
-    <div style="color:#999;font-family:var(--sans);font-size:13px;line-height:1.6;margin-bottom:10px">${msg}</div>
-    <button class="btn-primary" style="background:#8080e8" onclick="openSettings()">+ ENABLE AI FALLBACK</button>
-  </div>`;
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// INIT DROPDOWNS
-// ═══════════════════════════════════════════════════════════════════════
-
-function initDropdowns() {
-  ['c-year','f-year'].forEach(id => {
-    const el = document.getElementById(id);
-    YEARS.forEach(y => { const o = document.createElement('option'); o.value=y; o.textContent=y; el.appendChild(o); });
-  });
-  ['c-make','f-make'].forEach(id => {
-    const el = document.getElementById(id);
-    MAKES.forEach(m => { const o = document.createElement('option'); o.value=m; o.textContent=m; el.appendChild(o); });
-  });
-}
-
-function populateModels(makeId, modelId) {
-  const make = document.getElementById(makeId).value;
-  const modelEl = document.getElementById(modelId);
-  modelEl.innerHTML = '<option value="">Select</option>';
-  if (make && MODELS[make]) {
-    MODELS[make].forEach(m => { const o = document.createElement('option'); o.value=m; o.textContent=m; modelEl.appendChild(o); });
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// TAB SWITCHING
-// ═══════════════════════════════════════════════════════════════════════
-
-function switchTab(name) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  event.target.classList.add('active');
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// LOOKUP HELPERS
-// ═══════════════════════════════════════════════════════════════════════
-
-function diffBadge(d) {
-  const cls = {Easy:'badge-easy',Medium:'badge-med',Hard:'badge-hard'};
-  return `<span class="badge ${cls[d]||'badge-med'}">${d||'—'}</span>`;
-}
-
-function card(color, title, body) {
-  return `<div class="card c-${color}">${title?`<div class="card-title">${title}</div>`:''}${body}</div>`;
-}
-
-function ol(items) {
-  return '<ol class="result-list">' + items.map(i=>`<li>${i}</li>`).join('') + '</ol>';
-}
-
-function ul(items) {
-  return '<ul class="result-list">' + items.map(i=>`<li>${i}</li>`).join('') + '</ul>';
-}
-
-function notFound(msg) {
-  return `<div class="box-notfound"><div class="box-title">NOT IN DATABASE</div><div class="box-body">${msg}</div></div>`;
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// TAB 1: COMPLAINT
-// ═══════════════════════════════════════════════════════════════════════
-
-async function runComplaint() {
-  const year  = document.getElementById('c-year').value;
-  const make  = document.getElementById('c-make').value;
-  const model = document.getElementById('c-model').value;
-  const complaint = document.getElementById('c-complaint').value.trim();
-  const out = document.getElementById('c-result');
-
-  if (!year || !make || !model || !complaint) {
-    out.innerHTML = notFound('Please fill in Year, Make, Model, and a complaint description.');
-    return;
-  }
-
-  // Store the current search context globally so the feedback form can use it
-  window._currentSearch = { year, make, model, complaint };
-
-  const result = complaintLookup(year, make, model, complaint);
-
-  if (result) {
-    renderComplaint(result, 'db');
-    return;
-  }
-
-  // Not in database
-  if (!hasApiKey()) {
-    let html = notFound(`No built-in match for "${complaint}" on this ${year} ${make} ${model}. You can still view community fixes below, or be the first to share one.`);
-    html += aiOfferBox(`Want AI diagnosis for this complaint? Add an API key in Settings.`);
-    html += renderCommunityReports();
-    out.innerHTML = html;
-    return;
-  }
-
-  // AI fallback
-  out.innerHTML = aiLoadingBox(`Diagnosing ${make} ${model} — ${complaint}...`);
-  try {
-    const aiResult = await callAI(
-      `Vehicle: ${year} ${make} ${model}\nComplaint: ${complaint}`,
-      `You are an expert automotive technician. Respond with ONLY a JSON object (no markdown, no commentary) matching this exact schema:
-{"complaint_summary":"...","likely_causes":["..."],"diagnosis_steps":["..."],"corrections":[{"fix":"...","detail":"...","difficulty":"Easy|Medium|Hard","est_cost":"$XX-$XX"}],"tech_notes":"...","safety_warning":null}
-
-Make corrections practical and DIY-oriented. Use null for safety_warning if nothing applies.`
-    );
-    renderComplaint(aiResult, 'ai');
-  } catch (e) {
-    let html = aiErrorBox(e.message);
-    html += renderCommunityReports();
-    out.innerHTML = html;
-  }
-}
-
-function renderComplaint(result, source) {
-  const out = document.getElementById('c-result');
-  const sourceBadge = source === 'db'
-    ? '<span class="badge badge-db">⚡ DATABASE</span>'
-    : '<span class="badge badge-ai">🤖 AI</span>';
-  let html = '';
-
-  html += card('amber', null, `
-    ${sourceBadge}
-    <p class="body-text" style="margin-top:10px">${result.complaint_summary||''}</p>
-  `);
-
-  if (result.safety_warning) {
-    html += `<div class="box-warning"><div class="card-title">⚠ SAFETY WARNING</div><p class="body-text">${result.safety_warning}</p></div>`;
-  }
-
-  html += card('blue', 'Likely Causes', ol(result.likely_causes||[]));
-  html += card('teal', 'Diagnosis Steps', ol(result.diagnosis_steps||[]));
-
-  const fixes = (result.corrections||[]).map((c,i) => `
-    <div class="fix-row">
-      <div class="fix-header">
-        <span class="fix-name">${c.fix}</span>
-        <div style="display:flex;gap:6px;align-items:center">
-          ${diffBadge(c.difficulty)}
-          <span class="badge" style="background:#1a1a2a;color:#8080e8">${c.est_cost||''}</span>
-        </div>
-      </div>
-      <p class="body-text">${c.detail||''}</p>
-    </div>
-  `).join('');
-  html += card('amber', 'Corrections', fixes);
-
-  if (result.tech_notes) {
-    html += card('purple', 'Tech Notes / TSBs', `<p class="body-text">${result.tech_notes}</p>`);
-  }
-
-  // ═══ COMMUNITY REPORTS SECTION ═══
-  html += renderCommunityReports();
-
-  out.innerHTML = html;
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// COMMUNITY REPORTS (user-submitted fixes, saved in browser localStorage)
-// ═══════════════════════════════════════════════════════════════════════
-
-function reportKey(ctx) {
-  // Build a stable key from vehicle + complaint
-  const complaintSlug = ctx.complaint.toLowerCase().slice(0, 60).replace(/[^a-z0-9]+/g, '_');
-  return `reports_${ctx.year}_${ctx.make}_${ctx.model}_${complaintSlug}`;
-}
-
-function loadReports(ctx) {
-  try {
-    const raw = localStorage.getItem(reportKey(ctx));
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-
-function saveReports(ctx, reports) {
-  try {
-    localStorage.setItem(reportKey(ctx), JSON.stringify(reports));
-    return true;
-  } catch (e) {
-    alert('Could not save: ' + e.message);
-    return false;
-  }
-}
-
-function timeAgo(ts) {
-  const s = Math.floor((Date.now() - ts) / 1000);
-  if (s < 60) return 'just now';
-  if (s < 3600) return Math.floor(s/60) + 'm ago';
-  if (s < 86400) return Math.floor(s/3600) + 'h ago';
-  if (s < 2592000) return Math.floor(s/86400) + 'd ago';
-  return Math.floor(s/2592000) + 'mo ago';
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function renderCommunityReports() {
-  const ctx = window._currentSearch;
-  if (!ctx) return '';
-  const reports = loadReports(ctx);
-  const count = reports.length;
-
-  let body = '';
-
-  body += `<p class="body-text" style="margin-bottom:14px;font-size:12px;color:#666">
-    Real fixes from other DIYers who worked on this exact issue. Your report is saved in this browser and visible to anyone using this file on this computer.
-  </p>`;
-
-  if (count === 0) {
-    body += `<div style="padding:16px;background:#080808;border:1px dashed #2a2a2a;border-radius:3px;margin-bottom:14px">
-      <div style="color:#444;font-family:var(--mono);font-size:11px;letter-spacing:2px;margin-bottom:4px">NO REPORTS YET</div>
-      <div style="color:#777;font-family:var(--sans);font-size:12px">Be the first to share what worked for you.</div>
-    </div>`;
-  } else {
-    body += reports.map((r, i) => `
-      <div class="report-card">
-        <div class="report-header">
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <span class="badge ${r.worked ? 'report-worked' : 'report-didnt'}">${r.worked ? '✓ WORKED' : '◦ DID NOT FIX IT'}</span>
-            <span class="report-fix">${escapeHtml(r.fix)}</span>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center">
-            ${r.cost ? `<span class="badge" style="background:#1a1a2a;color:#8080e8">${escapeHtml(r.cost)}</span>` : ''}
-            ${diffBadge(r.difficulty)}
-            <button class="delete-btn" onclick="deleteReport(${i})" title="Delete this report">✕</button>
-          </div>
-        </div>
-        <p class="body-text" style="margin:0">${escapeHtml(r.details)}</p>
-        <div class="report-meta">— ${escapeHtml(r.name)} · ${timeAgo(r.timestamp)}</div>
-      </div>
-    `).join('');
-  }
-
-  body += `<div id="report-form-container"><button class="btn-secondary" onclick="showReportForm()">+ SHARE YOUR FIX</button></div>`;
-
-  return card('green', `Community Fixes (${count})`, body);
-}
-
-function showReportForm() {
-  const container = document.getElementById('report-form-container');
-  container.innerHTML = `
-    <div style="padding:16px;background:#080808;border:1px solid #1a3a1a;border-radius:3px">
-      <div style="color:var(--green);font-family:var(--mono);font-size:11px;letter-spacing:2px;margin-bottom:14px">SHARE YOUR FIX</div>
-
-      <div class="form-row">
-        <div>
-          <label class="field-label">Your Name (optional)</label>
-          <input id="rpt-name" placeholder="Anonymous" maxlength="40">
-        </div>
-        <div>
-          <label class="field-label">What You Replaced / Fixed *</label>
-          <input id="rpt-fix" placeholder="e.g. A/C pressure switch" maxlength="80">
-        </div>
-      </div>
-
-      <div style="margin-bottom:12px">
-        <label class="field-label">Details — What You Did *</label>
-        <textarea id="rpt-details" maxlength="1500" placeholder="Describe what you found and how you fixed it. Be specific — what tools, what part number, any gotchas someone else should know about." oninput="document.getElementById('rpt-chars').textContent = this.value.length"></textarea>
-        <div class="char-count"><span id="rpt-chars">0</span> / 1500</div>
-      </div>
-
-      <div class="form-row-3">
-        <div>
-          <label class="field-label">Total Cost</label>
-          <input id="rpt-cost" placeholder="e.g. $45" maxlength="20">
-        </div>
-        <div>
-          <label class="field-label">Difficulty</label>
-          <select id="rpt-difficulty">
-            <option value="Easy">Easy</option>
-            <option value="Medium" selected>Medium</option>
-            <option value="Hard">Hard</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label">Did It Work?</label>
-          <select id="rpt-worked">
-            <option value="yes">Yes — fixed it</option>
-            <option value="no">No — still broken</option>
-          </select>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:10px">
-        <button class="btn-secondary" onclick="submitReport()">▶ POST REPORT</button>
-        <button class="btn-ghost" onclick="cancelReportForm()">CANCEL</button>
-      </div>
-    </div>
-  `;
-}
-
-function cancelReportForm() {
-  const container = document.getElementById('report-form-container');
-  container.innerHTML = `<button class="btn-secondary" onclick="showReportForm()">+ SHARE YOUR FIX</button>`;
-}
-
-function submitReport() {
-  const ctx = window._currentSearch;
-  if (!ctx) return;
-
-  const name = document.getElementById('rpt-name').value.trim() || 'Anonymous';
-  const fix = document.getElementById('rpt-fix').value.trim();
-  const details = document.getElementById('rpt-details').value.trim();
-  const cost = document.getElementById('rpt-cost').value.trim();
-  const difficulty = document.getElementById('rpt-difficulty').value;
-  const worked = document.getElementById('rpt-worked').value === 'yes';
-
-  if (!fix) { alert('Please enter what you replaced or fixed.'); return; }
-  if (!details) { alert('Please enter some details about what you did.'); return; }
-
-  const newReport = {
-    name, fix, details, cost, difficulty, worked,
-    timestamp: Date.now(),
-    vehicle: `${ctx.year} ${ctx.make} ${ctx.model}`,
-    complaint: ctx.complaint,
-  };
-
-  const existing = loadReports(ctx);
-  const updated = [newReport, ...existing].slice(0, 50);
-
-  if (saveReports(ctx, updated)) {
-    runComplaint(); // re-render to show the new report
-    setTimeout(() => {
-      // scroll the community section into view
-      const comm = document.querySelector('.card.c-green');
-      if (comm) comm.scrollIntoView({behavior:'smooth', block:'start'});
-    }, 100);
-  }
-}
-
-function deleteReport(index) {
-  if (!confirm('Delete this report? This cannot be undone.')) return;
-  const ctx = window._currentSearch;
-  const reports = loadReports(ctx);
-  reports.splice(index, 1);
-  saveReports(ctx, reports);
-  runComplaint();
-}
-
 function complaintLookup(year, make, model, complaint) {
-  const yearNum = parseInt(year);
-  const cl = complaint.toLowerCase();
-  let best = null, bestScore = -1;
-
-  for (const entry of COMPLAINT_DB) {
-    const m = entry.match;
-    let score = 0;
-    if (m.make && m.make.toLowerCase() !== make.toLowerCase()) continue;
-    if (m.make) score += 50;
-    if (m.model && m.model.toLowerCase() !== model.toLowerCase()) continue;
-    if (m.model) score += 50;
-    if (m.models && !m.models.some(mm => mm.toLowerCase() === model.toLowerCase())) continue;
-    if (m.models) score += 50;
-    if (m.year_min && yearNum < m.year_min) continue;
-    if (m.year_max && yearNum > m.year_max) continue;
-    if (m.year_min || m.year_max) score += 30;
-    if (m.exclude_keywords && m.exclude_keywords.some(kw => cl.includes(kw.toLowerCase()))) continue;
-    if (m.keywords) {
-      const matched = m.keywords.filter(kw => cl.includes(kw.toLowerCase()));
-      if (matched.length === 0) continue;
-      score += matched.length * 10;
-    }
-    if (m.and_keywords && !m.and_keywords.some(kw => cl.includes(kw.toLowerCase()))) continue;
-    if (m.and_keywords) score += 20;
-    if (score > bestScore) { bestScore = score; best = entry; }
-  }
-  return best;
+if (!year || !make || !model || !complaint) return null;
+const yearNum = parseInt(year);
+const complaintLower = complaint.toLowerCase();
+let bestMatch = null, bestScore = -1;
+for (const entry of COMPLAINT_DATABASE) {
+const m = entry.match;
+let score = 0;
+if (m.make && m.make.toLowerCase() !== make.toLowerCase()) continue;
+if (m.make) score += 50;
+if (m.model && m.model.toLowerCase() !== model.toLowerCase()) continue;
+if (m.models && !m.models.some(mm => mm.toLowerCase() === model.toLowerCase())) continue;
+if (m.model || m.models) score += 50;
+if (m.year_min && yearNum < m.year_min) continue;
+if (m.year_max && yearNum > m.year_max) continue;
+if (m.year_min || m.year_max) score += 30;
+if (m.keywords) {
+const matched = m.keywords.filter(kw => complaintLower.includes(kw.toLowerCase()));
+if (matched.length === 0) continue;
+score += matched.length * 10;
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// TAB 2: DTC
-// ═══════════════════════════════════════════════════════════════════════
-
-async function runDTC() {
-  const raw = document.getElementById('d-code').value.trim().toUpperCase();
-  const out = document.getElementById('d-result');
-  if (!raw) return;
-
-  const r = DTC_DB[raw];
-  if (r) {
-    renderDTC(r, 'db');
-    return;
-  }
-
-  // Not in database — offer AI fallback
-  if (!hasApiKey()) {
-    out.innerHTML = notFound(`<strong style="color:#ccc">${raw}</strong> is not in the built-in database. Covered codes include: P0010, P0011, P0128, P0171, P0172, P0300–P0304, P0420, P0430, P0442, P0446, P0455, P0500, P0562, P0700, P2096, C0035, U0100, and more.`)
-      + aiOfferBox(`Want to decode <strong>${raw}</strong> using AI? Add an API key in Settings and it will fall back to AI when the database has no match.`);
-    return;
-  }
-
-  // AI fallback
-  out.innerHTML = aiLoadingBox(`Decoding ${raw}...`);
-  try {
-    const aiResult = await callAI(
-      `DTC Code: ${raw}`,
-      `You are an expert OBD-II specialist. Respond with ONLY a JSON object (no markdown, no commentary) matching this exact schema:
-{"code":"...","full_name":"...","system":"...","description":"...","common_causes":["..."],"symptoms":["..."],"diagnosis_procedure":["..."],"common_fixes":[{"fix":"...","notes":"...","difficulty":"Easy|Medium|Hard"}],"related_codes":["..."],"drive_safe":true,"drive_note":"..."}`
-    );
-    renderDTC(aiResult, 'ai');
-  } catch (e) {
-    out.innerHTML = aiErrorBox(e.message);
-  }
+if (score > bestScore) { bestScore = score; bestMatch = entry; }
 }
-
-function renderDTC(r, source) {
-  const out = document.getElementById('d-result');
-  let html = '';
-  const sourceBadge = source === 'db'
-    ? '<span class="badge badge-db">⚡ DATABASE</span>'
-    : '<span class="badge badge-ai">🤖 AI</span>';
-
-  html += card('amber', null, `
-    <div class="dtc-header">
-      <div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div class="dtc-code">${r.code}</div>
-          ${sourceBadge}
-        </div>
-        <div class="dtc-name">${r.full_name}</div>
-        <div class="dtc-system">${r.system||''}</div>
-      </div>
-      <div class="drive-pill ${r.drive_safe?'drive-yes':'drive-no'}">${r.drive_safe?'✓ DRIVEABLE':'✗ DO NOT DRIVE'}</div>
-    </div>
-    <p class="body-text" style="margin-top:12px">${r.drive_note||''}</p>
-  `);
-
-  html += card('blue', 'Description', `<p class="body-text">${r.description||''}</p>`);
-
-  html += `<div class="grid-2" style="margin-bottom:0">
-    ${card('amber2', 'Common Causes', ul(r.common_causes||[]))}
-    ${card('purple', 'Symptoms', ul(r.symptoms||[]))}
-  </div>`;
-
-  html += card('teal', 'Diagnosis Procedure', ol(r.diagnosis_procedure||[]));
-
-  const fixes = (r.common_fixes||[]).map(f => `
-    <div class="fix-row">
-      <div class="fix-header">
-        <span class="fix-name">${f.fix}</span>
-        ${diffBadge(f.difficulty)}
-      </div>
-      <p class="body-text">${f.notes||''}</p>
-    </div>
-  `).join('');
-  html += card('amber', 'Common Fixes', fixes);
-
-  if (r.related_codes && r.related_codes.length) {
-    const chips = r.related_codes.map(c =>
-      `<button class="related-chip" onclick="loadRelated('${c}')">${c}</button>`
-    ).join('');
-    html += card('dim', 'Related Codes', `<div style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div>`);
-  }
-
-  out.innerHTML = html;
+return bestMatch;
 }
-
-function loadRelated(code) {
-  document.getElementById('d-code').value = code;
-  runDTC();
-  window.scrollTo({top:0,behavior:'smooth'});
+function fluidLookup(year, make, model) {
+if (!make || !model) return null;
+const key = (make + " " + model).toLowerCase().trim();
+for (const dbKey of Object.keys(FLUID_DATABASE)) {
+if (key.includes(dbKey) || dbKey === key) return FLUID_DATABASE[dbKey];
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// TAB 3: TORQUE
-// ═══════════════════════════════════════════════════════════════════════
-
-function quickTorque(name) {
-  document.getElementById('t-component').value = name;
-  runTorque();
+return null;
 }
-
-async function runTorque() {
-  const input = document.getElementById('t-component').value.trim();
-  const out = document.getElementById('t-result');
-  if (!input) return;
-  const lower = input.toLowerCase();
-
-  let r = null;
-  for (const key of Object.keys(TORQUE_DB)) {
-    if (lower.includes(key) || key.includes(lower)) { r = TORQUE_DB[key]; break; }
-  }
-
-  if (r) {
-    renderTorque(r, 'db');
-    return;
-  }
-
-  if (!hasApiKey()) {
-    out.innerHTML = notFound(`No torque data for "<strong style="color:#ccc">${input}</strong>". Built-in covers: lug nuts, spark plugs, oil drain plug, brake caliper bolts, cylinder head bolts, valve cover bolts, axle nut.`)
-      + aiOfferBox(`Want torque specs for <strong>${input}</strong> from AI? Add an API key in Settings.`);
-    return;
-  }
-
-  out.innerHTML = aiLoadingBox(`Looking up torque specs for ${input}...`);
-  try {
-    const aiResult = await callAI(
-      `Component: ${input}`,
-      `You are an expert automotive technician with factory service manual knowledge. Respond with ONLY a JSON object (no markdown) matching this schema:
-{"component":"...","vehicle_note":"...","specs":[{"fastener":"...","location":"...","ftlb":"...","nm":"...","sequence":"...","notes":"..."}],"sequence_desc":"...","warnings":["..."],"thread_info":"...","mistakes":["..."],"wrench":"..."}`
-    );
-    renderTorque(aiResult, 'ai');
-  } catch (e) {
-    out.innerHTML = aiErrorBox(e.message);
-  }
+function dtcLookup(code) {
+return DTC_DATABASE[code.toUpperCase().trim()] || null;
 }
-
-function renderTorque(r, source) {
-  const out = document.getElementById('t-result');
-  const sourceBadge = source === 'db'
-    ? '<span class="badge badge-db">⚡ DATABASE</span>'
-    : '<span class="badge badge-ai">🤖 AI</span>';
-  let html = '';
-
-  html += card('amber', null, `
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
-      <span style="color:#fff;font-size:18px;font-weight:700">${r.component}</span>
-      ${sourceBadge}
-    </div>
-    <p class="body-text">${r.vehicle_note||''}</p>
-  `);
-
-  if (r.warnings && r.warnings.length) {
-    const warnItems = r.warnings.map(w =>
-      `<div style="display:flex;gap:10px;margin-bottom:6px"><span style="color:var(--red);flex-shrink:0">!</span><p class="body-text" style="color:#ff8080;margin:0">${w}</p></div>`
-    ).join('');
-    html += `<div class="box-warning"><div class="card-title">⚠ CRITICAL WARNINGS</div>${warnItems}</div>`;
-  }
-
-  const tableRows = (r.specs||[]).map(s => `
-    <tr>
-      <td style="color:var(--text)">${s.fastener}</td>
-      <td style="color:#777;font-size:11px">${s.location||''}</td>
-      <td style="color:var(--amber);font-weight:700;font-size:16px">${s.ftlb||''}</td>
-      <td style="color:var(--blue)">${s.nm||''}</td>
-      <td style="color:#aaa;font-size:11px">${s.sequence||'—'}</td>
-      <td style="color:#777;font-size:11px">${s.notes||'—'}</td>
-    </tr>
-  `).join('');
-
-  html += card('blue', 'Torque Specifications', `
-    <div style="overflow-x:auto">
-      <table class="data-table">
-        <thead><tr>
-          <th>FASTENER</th><th>LOCATION</th><th>FT-LB</th><th>Nm</th><th>SEQUENCE</th><th>NOTES</th>
-        </tr></thead>
-        <tbody>${tableRows}</tbody>
-      </table>
-    </div>
-  `);
-
-  if (r.sequence_desc) {
-    html += card('teal', 'Torque Sequence', `<p class="body-text">${r.sequence_desc}</p>`);
-  }
-
-  html += `<div class="grid-2">
-    ${card('purple', 'Thread Info & Recommended Wrench', `<p class="body-text">${r.thread_info||''}</p><div style="margin-top:10px"><div style="font-size:10px;letter-spacing:2px;color:#555;margin-bottom:4px">RECOMMENDED WRENCH</div><div style="color:var(--purple);font-size:13px">${r.wrench||''}</div></div>`)}
-    ${card('red', 'Common Mistakes', ul(r.mistakes||[]))}
-  </div>`;
-
-  out.innerHTML = html;
+function torqueLookup(component) {
+const key = component.toLowerCase().trim();
+for (const dbKey of Object.keys(TORQUE_DATABASE)) {
+if (key.includes(dbKey) || dbKey.includes(key)) return TORQUE_DATABASE[dbKey];
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// TAB 4: FLUIDS
-// ═══════════════════════════════════════════════════════════════════════
-
-const FLUID_COLORS = {
-  'engine oil':'#e8a020','coolant':'#20e8a0','transmission':'#a020e8',
-  'cvt':'#20a0e8','differential':'#e84040','brake':'#e8e020','power steering':'#20e870'
+return null;
+}
+function extractJSON(text) {
+if (!text) throw new Error("Empty response");
+try { return JSON.parse(text); } catch {}
+let cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+try { return JSON.parse(cleaned); } catch {}
+const start = cleaned.indexOf("{"), end = cleaned.lastIndexOf("}");
+if (start !== -1 && end > start) {
+try { return JSON.parse(cleaned.slice(start, end + 1)); } catch {}
+try {
+const repaired = cleaned.slice(start, end + 1)
+.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'")
+.replace(/,(\s*[}\]])/g, "$1").replace(/\r?\n/g, "\\n");
+return JSON.parse(repaired);
+} catch {}
+}
+throw new Error("Could not parse AI response");
+}
+async function callClaude(prompt, systemPrompt) {
+const response = await fetch("https://api.anthropic.com/v1/messages", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({
+model: "claude-sonnet-4-20250514",
+max_tokens: 1500,
+system: systemPrompt + "\n\nCRITICAL: Return ONLY raw JSON. No markdown, no fences, no
+messages: [{ role: "user", content: prompt }],
+}),
+});
+if (!response.ok) throw new Error(`API ${response.status}`);
+const data = await response.json();
+if (data.error) throw new Error(data.error.message);
+return data.content?.[0]?.text || "";
+}
+// ── Shared Styles ──
+const S = {
+label: { display:"block", fontFamily:"'Courier New', monospace", fontSize:10, letterSpacing
+body: { color:"#aaa", fontSize:13, lineHeight:1.7, fontFamily:"'Georgia', serif" },
+badge: { display:"inline-block", padding:"3px 8px", borderRadius:2, fontSize:10, fontFamily
+btn: { background:"#e8a020", color:"#000", border:"none", padding:"12px 28px", fontFamily:"
+select: { background:"#111", border:"1px solid #333", color:"#e8e8e8", padding:"10px 12px",
 };
-function fluidColor(sys) {
-  const low = sys.toLowerCase();
-  for (const [k,v] of Object.entries(FLUID_COLORS)) if (low.includes(k)) return v;
-  return '#888';
+function Spinner({ label = "Processing..." }) {
+return (
+<div style={{ display:"flex", alignItems:"center", gap:10, color:"#e8a020", fontFamily:"m
+<div className="spinner" /><span>{label}</span>
+</div>
+);
 }
-
-async function runFluids() {
-  const year  = document.getElementById('f-year').value;
-  const make  = document.getElementById('f-make').value;
-  const model = document.getElementById('f-model').value;
-  const out   = document.getElementById('f-result');
-
-  if (!make || !model) {
-    out.innerHTML = notFound('Please select a Make and Model.');
-    return;
-  }
-
-  const key = (make + ' ' + model).toLowerCase().trim();
-  let r = null;
-  for (const dbKey of Object.keys(FLUID_DB)) {
-    if (key.includes(dbKey) || dbKey === key) { r = FLUID_DB[dbKey]; break; }
-  }
-
-  if (r) {
-    renderFluids(r, 'db');
-    return;
-  }
-
-  if (!hasApiKey()) {
-    out.innerHTML = notFound(`No fluid data for <strong style="color:#ccc">${make} ${model}</strong>. Covered: Honda Civic, Toyota Camry, Ford F-150, Chevrolet Silverado, Toyota RAV4, Jeep Wrangler, Honda Accord, Subaru Outback, Nissan Altima.`)
-      + aiOfferBox(`Want fluid specs for the <strong>${make} ${model}</strong> from AI? Add an API key in Settings.`);
-    return;
-  }
-
-  out.innerHTML = aiLoadingBox(`Looking up fluid specs for ${make} ${model}...`);
-  try {
-    const vehicle = `${year||''} ${make} ${model}`.trim();
-    const aiResult = await callAI(
-      `Vehicle: ${vehicle}`,
-      `You are an automotive fluid and maintenance expert. Respond with ONLY a JSON object (no markdown) matching this schema:
-{"vehicle":"...","engine_note":"...","fluids":[{"system":"Engine Oil","capacity":"...","spec":"...","grade":"...","type":"...","interval":"...","notes":"..."}],"drain_torque":"...","filter":"...","warning":"...","tips":["..."]}`
-    );
-    renderFluids(aiResult, 'ai');
-  } catch (e) {
-    out.innerHTML = aiErrorBox(e.message);
-  }
+function Card({ title, children, accent = "#333" }) {
+return (
+<div style={{ background:"#0d0d0d", border:`1px solid ${accent}`, borderRadius:4, padding
+<div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:accent,
+{title && <div style={{ color:accent, fontFamily:"'Courier New', monospace", fontSize:1
+{children}
+</div>
+);
 }
-
-function renderFluids(r, source) {
-  const out = document.getElementById('f-result');
-  const sourceBadge = source === 'db'
-    ? '<span class="badge badge-db">⚡ DATABASE</span>'
-    : '<span class="badge badge-ai">🤖 AI</span>';
-  let html = '';
-
-  html += card('teal', null, `
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
-      <span style="color:#fff;font-size:16px;font-weight:700">${r.vehicle||''}</span>
-      ${sourceBadge}
-    </div>
-    <p class="body-text">${r.engine_note||''}</p>
-  `);
-
-  const fluidCards = (r.fluids||[]).map(f => {
-    const col = fluidColor(f.system||'');
-    return `
-      <div class="fluid-card" style="border:1px solid ${col}22">
-        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${col};border-radius:3px 3px 0 0"></div>
-        <div class="fluid-system" style="color:${col}">${(f.system||'').toUpperCase()}</div>
-        <div class="fluid-capacity">${f.capacity||''}</div>
-        <div class="fluid-meta">
-          <div class="fluid-meta-item"><label>Spec</label><span>${f.spec||'—'}</span></div>
-          <div class="fluid-meta-item"><label>Grade</label><span>${f.grade||'—'}</span></div>
-          <div class="fluid-meta-item"><label>Type</label><span>${f.type||'—'}</span></div>
-          <div class="fluid-meta-item"><label>Interval</label><span>${f.interval||'—'}</span></div>
-        </div>
-        ${f.notes ? `<p class="body-text" style="font-size:11px;color:#666;margin-top:8px;border-top:1px solid #1a1a1a;padding-top:8px">${f.notes}</p>` : ''}
-      </div>
-    `;
-  }).join('');
-
-  html += `<div class="fluid-grid">${fluidCards}</div>`;
-
-  html += `<div class="grid-2" style="margin-top:12px">
-    ${r.drain_torque ? card('amber', 'Drain Plug Torque', `<div style="font-size:18px;font-weight:700;color:var(--amber)">${r.drain_torque}</div>`) : ''}
-    ${r.filter ? card('blue', 'Filter Notes', `<p class="body-text">${r.filter}</p>`) : ''}
-  </div>`;
-
-  if (r.warning) {
-    html += `<div class="box-warning"><div class="card-title">⚠ SPECIAL CONSIDERATIONS</div><p class="body-text">${r.warning}</p></div>`;
-  }
-
-  const tips = (r.tips||[]).map(t =>
-    `<div class="tip-row"><span class="tip-star">✦</span><span class="body-text">${t}</span></div>`
-  ).join('');
-  html += card('yellow', 'Maintenance Tips', tips);
-
-  out.innerHTML = html;
+function ErrMsg({ msg }) {
+return (
+<div style={{ marginTop:16, padding:16, background:"#1a0a0a", border:"1px solid #4a1a1a",
+<div style={{ color:"#e84040", fontFamily:"monospace", fontSize:12, marginBottom:6 }}>⚠
+<div style={{ color:"#ff8080", fontFamily:"monospace", fontSize:12 }}>{msg || "Could no
+<div style={{ color:"#888", fontFamily:"monospace", fontSize:11, marginTop:8 }}>If this
+</div>
+);
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════════════════════════════════
-initDropdowns();
-updateSettingsButton();
-</script>
-</body>
-</html>
+function DiffBadge({ d }) {
+const cfg = { Easy:["#1a3a1a","#50d050"], Medium:["#3a2a0a","#e8a020"], Hard:["#3a0a0a","#e
+const [bg, fg] = cfg[d] || ["#1a1a1a","#888"];
+return <span style={{ ...S.badge, background:bg, color:fg }}>{d || "—"}</span>;
+}
+function VehicleSelector({ year, setYear, make, setMake, model, setModel }) {
+const models = make ? (MODELS[make] || []) : [];
+return (
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginBottom:16
+{[
+{ label:"YEAR", val:year, set:setYear, opts:YEARS.map(y => ({val:y, label:y})) },
+{ label:"MAKE", val:make, set:(v) => { setMake(v); setModel(""); }, opts:MAKES.map(m
+{ label:"MODEL", val:model, set:setModel, opts:models.map(m => ({val:m, label:m})), d
+].map(({ label, val, set, opts, disabled }) => (
+<div key={label}>
+<label style={S.label}>{label}</label>
+<select style={{ ...S.select, opacity: disabled ? 0.4 : 1 }} value={val} onChange={
+<option value="">Any</option>
+{opts.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
+</select>
+</div>
+))}
+</div>
+);
+}
+// ── Tab 1: Complaint ──
+function ComplaintLookup() {
+const [year, setYear] = useState(""); const [make, setMake] = useState(""); const [model, s
+const [complaint, setComplaint] = useState(""); const [loading, setLoading] = useState(fals
+async function handle() {
+if (!year || !make || !model || !complaint.trim()) return;
+setLoading(true); setResult(null);
+const db = complaintLookup(year, make, model, complaint);
+if (db) { setResult(db); setLoading(false); return; }
+try {
+const raw = await callClaude(`Vehicle: ${year} ${make} ${model}\nComplaint: ${complaint
+`You are an expert automotive technician. Respond ONLY with a JSON object: {"complain
+setResult({ ...extractJSON(raw), _source:"ai" });
+} catch (e) { setResult({ error:true, msg:e.message }); }
+setLoading(false);
+}
+return (
+<div>
+color:
+<VehicleSelector year={year} setYear={setYear} make={make} setMake={setMake} model={mod
+<div style={{ marginBottom:14 }}>
+<label style={S.label}>COMPLAINT / SYMPTOM</label>
+<textarea style={{ ...S.select, minHeight:80, resize:"vertical", lineHeight:1.6 }}
+placeholder="Describe the issue — e.g., 'A/C blows warm, compressor clutch won't en
+value={complaint} onChange={e => setComplaint(e.target.value)} />
+</div>
+<button onClick={handle} disabled={loading || !year || !make || !model || !complaint.tr
+{loading ? "DIAGNOSING..." : "▶ RUN DIAGNOSIS"}
+</button>
+{loading && <Spinner label="Diagnosing..." />}
+{result?.error && <ErrMsg msg={result.msg} />}
+{result && !result.error && <>
+<Card title="COMPLAINT SUMMARY" accent="#e8a020">
+{result._source === "database" && <span style={{ ...S.badge, background:"#0a2a1a",
+{result._source === "ai" && <span style={{ ...S.badge, background:"#1a1a2a", <p style={S.body}>{result.complaint_summary}</p>
+</Card>
+{result.safety_warning && <Card title="⚠ SAFETY WARNING" accent="#e83030"><p style={{
+<Card title="LIKELY CAUSES" accent="#20a0e8">
+<ol style={{ paddingLeft:18, margin:0 }}>{result.likely_causes?.map((c,i) => </Card>
+<Card title="DIAGNOSIS STEPS" accent="#20e8a0">
+<ol style={{ paddingLeft:18, margin:0 }}>{result.diagnosis_steps?.map((s,i) => <li
+</Card>
+<Card title="CORRECTIONS" accent="#e8a020">
+{result.corrections?.map((c,i) => (
+<div key={i} style={{ marginBottom:14, paddingBottom:14, borderBottom: i < result
+<div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}
+<span style={{ color:"#fff", fontWeight:600, fontFamily:"monospace", fontSize
+<div style={{ display:"flex", gap:8 }}>
+<DiffBadge d={c.difficulty} />
+{c.est_cost && <span style={{ ...S.badge, background:"#1a1a2a", color:"#808
+</div>
+</div>
+<p style={{ ...S.body, margin:0 }}>{c.detail}</p>
+</div>
+<li ke
+))}
+</Card>
+</>}
+</div>
+{result.tech_notes && <Card title="TECH NOTES / TSBs" accent="#a020e8"><p style={S.bo
+);
+}
+// ── Tab 2: DTC ──
+function DTCLookup() {
+const [code, setCode] = useState(""); const [year, setYear] = useState(""); const [make, se
+const [loading, setLoading] = useState(false); const [result, setResult] = useState(null);
+async function handle() {
+if (!code.trim()) return;
+setLoading(true); setResult(null);
+const db = dtcLookup(code);
+if (db) { setResult({ ...db, _source:"database" }); setLoading(false); return; }
+const v = year && make && model ? `${year} ${make} ${model}` : "generic vehicle";
+try {
+const raw = await callClaude(`DTC Code: ${code.toUpperCase()}\nVehicle: ${v}`,
+`You are an expert OBD-II specialist. Respond ONLY with JSON: {"code":"...","full_nam
+setResult({ ...extractJSON(raw), _source:"ai" });
+} catch (e) { setResult({ error:true, msg:e.message }); }
+setLoading(false);
+}
+return (
+<div>
+<div style={{ marginBottom:14 }}>
+<label style={S.label}>DTC CODE</label>
+<input style={{ ...S.select, textTransform:"uppercase", letterSpacing:2, fontSize:16
+placeholder="e.g. P0300, B1234, C0035, U0100"
+value={code} onChange={e => setCode(e.target.value)} onKeyDown={e => e.key === "Ent
+</div>
+<VehicleSelector year={year} setYear={setYear} make={make} setMake={setMake} model={mod
+<button onClick={handle} disabled={loading || !code.trim()} style={S.btn}>{loading ? "D
+{loading && <Spinner label="Decoding DTC..." />}
+{result?.error && <ErrMsg msg={result.msg} />}
+{result && !result.error && <>
+<Card accent="#e8a020">
+<div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-star
+<div>
+<div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap", mar
+<div style={{ fontFamily:"monospace", fontSize:28, fontWeight:700, color:"#e8
+{result._source === "database" && <span style={{ ...S.badge, background:"#0a2
+{result._source === "ai" && <span style={{ ...S.badge, background:"#1a1a2a",
+</div>
+<div style={{ color:"#fff", fontSize:14 }}>{result.full_name}</div>
+<div style={{ color:"#666", fontSize:11, fontFamily:"monospace", marginTop:4 }}
+</div>
+<div style={{ padding:"8px 16px", borderRadius:3, fontFamily:"monospace", fontSiz
+{result.drive_safe ? "✓ DRIVEABLE" : "✗ DO NOT DRIVE"}
+</div>
+</div>
+<p style={{ ...S.body, marginTop:12 }}>{result.drive_note}</p>
+</Card>
+<Card title="DESCRIPTION" accent="#20a0e8"><p style={S.body}>{result.description}</p>
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+<Card title="COMMON CAUSES" accent="#e87020">
+<ul style={{ paddingLeft:18, margin:0 }}>{result.common_causes?.map((c,i) => <li
+</Card>
+<Card title="SYMPTOMS" accent="#a020e8">
+<ul style={{ paddingLeft:18, margin:0 }}>{result.symptoms?.map((s,i) => <li key={
+</Card>
+</div>
+<Card title="DIAGNOSIS PROCEDURE" accent="#20e8a0">
+<ol style={{ paddingLeft:18, margin:0 }}>{result.diagnosis_procedure?.map((s,i) =>
+</Card>
+<Card title="COMMON FIXES" accent="#e8a020">
+{result.common_fixes?.map((f,i) => (
+<div key={i} style={{ marginBottom:14, paddingBottom:14, borderBottom: i < result
+<div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}
+<span style={{ color:"#fff", fontFamily:"monospace", fontSize:14 }}>{f.fix}</
+<DiffBadge d={f.difficulty} />
+</div>
+<p style={{ ...S.body, margin:0 }}>{f.notes}</p>
+</div>
+))}
+</Card>
+{result.related_codes?.length > 0 && (
+<Card title="RELATED CODES" accent="#555">
+<div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+{result.related_codes.map(c => (
+<button key={c} onClick={() => { setCode(c); setResult(null); }}
+style={{ ...S.badge, cursor:"pointer", background:"#1a1a1a", color:"#e8a020
+{c}
+</button>
+))}
+</div>
+</Card>
+)}
+</>}
+</div>
+);
+}
+// ── Tab 3: Torque Specs ──
+function TorqueSpecs() {
+const [year, setYear] = useState(""); const [make, setMake] = useState(""); const [model, s
+const [engine, setEngine] = useState(""); const [component, setComponent] = useState("");
+const [loading, setLoading] = useState(false); const [result, setResult] = useState(null);
+const quickPicks = ["Lug Nuts / Wheel Bolts","Spark Plugs","Oil Drain Plug","Cylinder Head
+async function handle(comp) {
+const c = comp || component;
+if (!c.trim()) return;
+if (comp) setComponent(comp);
+setLoading(true); setResult(null);
+const db = torqueLookup(c);
+if (db) { setResult({ ...db, _source:"database" }); setLoading(false); return; }
+const v = year && make && model ? `${year} ${make} ${model}${engine?" "+engine:""}` : "ge
+try {
+const raw = await callClaude(`Vehicle: ${v}\nComponent: ${c}`,
+`You are an expert automotive technician. Respond ONLY with JSON: {"component":"...",
+setResult({ ...extractJSON(raw), _source:"ai" });
+} catch (e) { setResult({ error:true, msg:e.message }); }
+setLoading(false);
+}
+return (
+<div>
+<VehicleSelector year={year} setYear={setYear} make={make} setMake={setMake} model={mod
+<div style={{ marginBottom:12 }}>
+<label style={S.label}>ENGINE (optional)</label>
+<input style={S.select} placeholder="e.g. 5.7L HEMI, 2.0T, 3.5L EcoBoost" value={engi
+</div>
+<div style={{ marginBottom:12 }}>
+<label style={S.label}>COMPONENT / FASTENER</label>
+<input style={S.select} placeholder="e.g. lug nuts, cylinder head bolts, spark plugs"
+value={component} onChange={e => setComponent(e.target.value)} onKeyDown={e => e.ke
+</div>
+<div style={{ marginBottom:16 }}>
+<div style={{ fontFamily:"monospace", fontSize:10, letterSpacing:3, color:"#444", mar
+<div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+{quickPicks.map(q => (
+<button key={q} onClick={() => handle(q)}
+style={{ ...S.badge, background:"#111", color:"#777", border:"1px solid #222",
+{q}
+</button>
+))}
+</div>
+</div>
+<button onClick={() => handle()} disabled={loading || !component.trim()} style={S.btn}>
+{loading && <Spinner label="Fetching torque specifications..." />}
+{result?.error && <ErrMsg msg={result.msg} />}
+{result && !result.error && <>
+<Card accent="#e8a020">
+<div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap", marginB
+<div style={{ color:"#fff", fontSize:18, fontWeight:700 }}>{result.component}</di
+{result._source === "database" && <span style={{ ...S.badge, background:"#0a2a1a"
+{result._source === "ai" && <span style={{ ...S.badge, background:"#1a1a2a", colo
+</div>
+{result.vehicle_note && <p style={S.body}>{result.vehicle_note}</p>}
+</Card>
+{result.critical_warnings?.length > 0 && (
+<Card title="⚠ CRITICAL WARNINGS" accent="#e83030">
+{result.critical_warnings.map((w,i) => (
+<div key={i} style={{ display:"flex", gap:10, marginBottom:6 }}>
+<span style={{ color:"#e84040", flexShrink:0 }}>!</span>
+<p style={{ ...S.body, color:"#ff8080", margin:0 }}>{w}</p>
+</div>
+))}
+</Card>
+)}
+<Card title="TORQUE SPECIFICATIONS" accent="#20a0e8">
+<div style={{ overflowX:"auto" }}>
+<table style={{ width:"100%", borderCollapse:"collapse", fontFamily:"monospace",
+<thead>
+<tr style={{ borderBottom:"1px solid #333" }}>
+{["FASTENER","LOCATION","FT-LB","Nm","NOTES"].map(h => (
+<th key={h} style={{ textAlign:"left", padding:"6px 10px", color:"#555",
+))}
+</tr>
+</thead>
+<tbody>
+{result.specs?.map((s,i) => (
+<tr key={i} style={{ borderBottom:"1px solid #1a1a1a" }}>
+<td style={{ padding:"10px", color:"#e8e8e8" }}>{s.fastener}</td>
+<td style={{ padding:"10px", color:"#777", fontSize:11 }}>{s.location}</t
+<td style={{ padding:"10px", color:"#e8a020", fontWeight:700, fontSize:14
+<td style={{ padding:"10px", color:"#20a0e8" }}>{s.torque_nm}</td>
+<td style={{ padding:"10px", color:"#777", fontSize:11 }}>{s.notes </tr>
+|| s.s
+))}
+</tbody>
+</table>
+</div>
+</Card>
+{result.torque_sequence_description && <Card title="TORQUE SEQUENCE" accent="#20e8a0"
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+<Card title="THREAD INFO & TOOL" accent="#a020e8">
+<p style={S.body}>{result.thread_info}</p>
+<div style={{ marginTop:10 }}>
+<div style={{ ...S.label, marginBottom:4 }}>RECOMMENDED WRENCH</div>
+<div style={{ color:"#a060e8", fontFamily:"monospace", fontSize:12 }}>{result.t
+</div>
+</Card>
+<Card title="COMMON MISTAKES" accent="#e84040">
+<ul style={{ paddingLeft:18, margin:0 }}>{result.common_mistakes?.map((m,i) => <l
+</Card>
+</div>
+</>}
+</div>
+);
+}
+// ── Tab 4: Fluid Capacity ──
+function FluidCapacity() {
+const [year, setYear] = useState(""); const [make, setMake] = useState(""); const [model, s
+const [engine, setEngine] = useState(""); const [trans, setTrans] = useState("");
+const [loading, setLoading] = useState(false); const [result, setResult] = useState(null);
+const fluidColors = { "engine oil":"#e8a020", "coolant":"#20e8a0", "transmission":"#a020e8"
+function getColor(sys) {
+const low = sys.toLowerCase();
+for (const [k,v] of Object.entries(fluidColors)) if (low.includes(k)) return v;
+return "#888";
+}
+async function handle() {
+setLoading(true); setResult(null);
+const db = fluidLookup(year, make, model);
+if (db) { setResult({ ...db, _source:"database" }); setLoading(false); return; }
+const v = year && make && model ? `${year} ${make} ${model}${engine?" "+engine:""}${trans
+try {
+const raw = await callClaude(`Vehicle: ${v}`,
+`You are an automotive fluid expert. Respond ONLY with JSON: {"vehicle":"...","engine
+setResult({ ...extractJSON(raw), _source:"ai" });
+} catch (e) { setResult({ error:true, msg:e.message }); }
+setLoading(false);
+}
+return (
+<div>
+<VehicleSelector year={year} setYear={setYear} make={make} setMake={setMake} model={mod
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:16 }}
+<div>
+<label style={S.label}>ENGINE (optional)</label>
+<input style={S.select} placeholder="e.g. 3.5L V6, 2.0T, 5.7L HEMI" value={engine}
+</div>
+<div>
+<label style={S.label}>TRANSMISSION (optional)</label>
+<select style={S.select} value={trans} onChange={e => setTrans(e.target.value)}>
+{["","Automatic","Manual","CVT","DCT / Dual-Clutch","4WD / AWD"].map(t => <option
+</select>
+</div>
+</div>
+<button onClick={handle} disabled={loading} style={S.btn}>{loading ? "LOADING..." : "▶
+{loading && <Spinner label="Retrieving fluid specifications..." />}
+{result?.error && <ErrMsg msg={result.msg} />}
+{result && !result.error && <>
+<Card accent="#20e8a0">
+<div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap", marginB
+<div style={{ color:"#fff", fontSize:16, fontWeight:700 }}>{result.vehicle}</div>
+{result._source === "database" && <span style={{ ...S.badge, background:"#0a2a1a"
+{result._source === "ai" && <span style={{ ...S.badge, background:"#1a1a2a", colo
+</div>
+{result.engine_note && <p style={S.body}>{result.engine_note}</p>}
+</Card>
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginTop:4 }}>
+{result.fluids?.map((f,i) => {
+const color = getColor(f.system);
+return (
+<div key={i} style={{ background:"#0d0d0d", border:`1px solid ${color}33`, bord
+<div style={{ position:"absolute", top:0, left:0, right:0, height:2, backgrou
+<div style={{ display:"flex", justifyContent:"space-between", alignItems:"fle
+<div style={{ fontFamily:"monospace", fontSize:10, letterSpacing:2, color:c
+<div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#
+</div>
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBot
+{[["Spec",f.spec],["Grade",f.viscosity_grade||"—"],["Type",f.fluid_type],["
+<div key={lbl}>
+<div style={{ fontFamily:"monospace", fontSize:9, color:"#444", letterS
+<div style={{ fontFamily:"monospace", fontSize:11, color:"#ccc" }}>{val
+</div>
+))}
+</div>
+</div>
+{f.notes && <p style={{ ...S.body, fontSize:11, margin:0, color:"#666" }}>{f.
+);
+})}
+</div>
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginTop:12 }}>
+{result.drain_plug_torque && (
+<Card title="DRAIN PLUG TORQUE" accent="#e8a020">
+<div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8a0
+</Card>
+)}
+</div>
+{result.special_considerations && (
+{result.filter_notes && <Card title="FILTER NOTES" accent="#20a0e8"><p style={S.bod
+<Card title="SPECIAL CONSIDERATIONS" accent="#e84040">
+<p style={{ ...S.body, color:"#ff9090" }}>{result.special_considerations}</p>
+</Card>
+)}
+{result.maintenance_tips?.length > 0 && (
+<Card title="MAINTENANCE TIPS" accent="#e8e020">
+{result.maintenance_tips.map((t,i) => (
+<div key={i} style={{ display:"flex", gap:10, marginBottom:8 }}>
+<span style={{ color:"#e8e020", flexShrink:0 }}>✦</span><span style={S.body}>
+</div>
+))}
+</Card>
+)}
+</>}
+</div>
+);
+}
+// ── Tab 5: Parts Estimator ──
+function PartsEstimator() {
+const [year, setYear] = useState(""); const [make, setMake] = useState(""); const [model, s
+const [engine, setEngine] = useState(""); const [job, setJob] = useState(""); const [qualit
+const [loading, setLoading] = useState(false); const [result, setResult] = useState(null);
+async function handle() {
+if (!job.trim()) return;
+setLoading(true); setResult(null);
+const v = year && make && model ? `${year} ${make} ${model}${engine?" "+engine:""}` : "ge
+try {
+const raw = await callClaude(`Vehicle: ${v}\nJob: ${job}\nPart Quality: ${quality}`,
+`You are an automotive parts specialist. Respond ONLY with JSON: {"job_title":"...","
+setResult(extractJSON(raw));
+} catch (e) { setResult({ error:true, msg:e.message }); }
+setLoading(false);
+}
+return (
+<div>
+<VehicleSelector year={year} setYear={setYear} make={make} setMake={setMake} model={mod
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:16 }}
+<div>
+<label style={S.label}>ENGINE (optional)</label>
+<input style={S.select} placeholder="e.g. 5.0L V8, 2.5L 4-cyl" value={engine} onCha
+</div>
+<div>
+<label style={S.label}>PART QUALITY</label>
+<select style={S.select} value={quality} onChange={e => setQuality(e.target.value)}
+{["OEM","OEM Equivalent","Aftermarket","Remanufactured","Budget"].map(q => <optio
+"Enter
+</select>
+</div>
+</div>
+<div style={{ marginBottom:14 }}>
+<label style={S.label}>REPAIR JOB</label>
+<input style={S.select} placeholder="e.g. front brake pads and rotors, timing chain,
+value={job} onChange={e => setJob(e.target.value)} onKeyDown={e => e.key === </div>
+<button onClick={handle} disabled={loading || !job.trim()} style={S.btn}>{loading ? "ES
+{loading && <Spinner label="Estimating parts & costs..." />}
+{result?.error && <ErrMsg msg={result.msg} />}
+{result && !result.error && <>
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginBottom
+{[
+{ label:"DIY TOTAL", value:result.total_diy_cost, color:"#20e870", bg:"#0a2a0a" }
+{ label:"SHOP TOTAL", value:result.total_shop_cost, color:"#e84040", bg:"#2a0a0a"
+{ label:"YOU SAVE", value:result.savings, color:"#e8e020", bg:"#2a2a0a" },
+].map(item => (
+<div key={item.label} style={{ background:item.bg, border:`1px solid ${item.color
+<div style={{ ...S.label, marginBottom:6 }}>{item.label}</div>
+<div style={{ fontFamily:"monospace", fontSize:22, fontWeight:700, color:item.c
+</div>
+))}
+</div>
+<Card title="PARTS LIST" accent="#20a0e8">
+<div style={{ overflowX:"auto" }}>
+<table style={{ width:"100%", borderCollapse:"collapse", fontFamily:"monospace",
+<thead>
+<tr style={{ borderBottom:"1px solid #333" }}>
+{["PART","P/N","QTY","OEM","AFTERMKT","CRITICAL"].map(h => (
+<th key={h} style={{ textAlign:"left", padding:"6px 10px", color:"#555",
+))}
+</tr>
+</thead>
+<tbody>
+{result.parts?.map((p,i) => (
+<tr key={i} style={{ borderBottom:"1px solid #1a1a1a" }}>
+<td style={{ padding:"10px", color:"#e8e8e8" }}>{p.name}</td>
+<td style={{ padding:"10px", color:"#555", fontSize:11 }}>{p.part_number
+<td style={{ padding:"10px", color:"#aaa", textAlign:"center" }}>{p.qty |
+<td style={{ padding:"10px", color:"#8080e8" }}>{p.oem_price || "—"}</td>
+<td style={{ padding:"10px", color:"#20e8a0" }}>{p.aftermarket_price || "
+<td style={{ padding:"10px" }}>
+<span style={{ ...S.badge, background: p.critical ? "#2a0a0a" : "#0a1a0
+{p.critical ? "YES" : "NO"}
+</span>
+</td>
+</tr>
+))}
+</tbody>
+</table>
+</div>
+</Card>
+<Card title="LABOR ESTIMATE" accent="#a020e8">
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:16 }}>
+{[["Est. Hours", result.labor_estimate?.hours],["Shop Rate", result.labor_estimat
+<div key={lbl}>
+<div style={{ ...S.label, marginBottom:4 }}>{lbl}</div>
+<div style={{ color:"#a060e8", fontFamily:"monospace", fontSize:16, fontWeigh
+</div>
+))}
+</div>
+</Card>
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+<Card title="WHERE TO BUY" accent="#20e8a0">
+<ul style={{ paddingLeft:18, margin:0 }}>{result.where_to_buy?.map((w,i) => <li k
+</Card>
+<Card title="COST-SAVING TIPS" accent="#e8e020">
+<ul style={{ paddingLeft:18, margin:0 }}>{result.cost_saving_tips?.map((t,i) => <
+</Card>
+</div>
+</>}
+</div>
+);
+}
+// ── Tab 6: Tool Finder ──
+function ToolFinder() {
+const [job, setJob] = useState(""); const [year, setYear] = useState(""); const [make, setM
+const [loading, setLoading] = useState(false); const [result, setResult] = useState(null);
+const catColor = { Basic:"#20a0e8", Specialty:"#e8a020", Power:"#e84040", Safety:"#20e870"
+async function handle() {
+if (!job.trim()) return;
+setLoading(true); setResult(null);
+const v = year && make && model ? `${year} ${make} ${model}` : "generic vehicle";
+try {
+const raw = await callClaude(`Job: ${job}\nVehicle: ${v}`,
+`You are an expert automotive technician. Respond ONLY with JSON: {"job_title":"...",
+setResult(extractJSON(raw));
+} catch (e) { setResult({ error:true, msg:e.message }); }
+setLoading(false);
+}
+const skillCfg = { Beginner:["#0a2a0a","#50d050"], Intermediate:["#1a1a0a","#e8e820"], Adva
+<div style={{ color:"#fff", fontSize:18, fontWeight:700, marginBottom:4 }}>{res
+<p style={{ ...S.body, margin:0 }}>{result.overview}</p>
+return (
+<div>
+<div style={{ marginBottom:14 }}>
+<label style={S.label}>JOB / REPAIR</label>
+<input style={S.select} placeholder="e.g. brake pad replacement, timing belt, water p
+value={job} onChange={e => setJob(e.target.value)} onKeyDown={e => e.key === "Enter
+</div>
+<VehicleSelector year={year} setYear={setYear} make={make} setMake={setMake} model={mod
+<button onClick={handle} disabled={loading || !job.trim()} style={S.btn}>{loading ? "BU
+{loading && <Spinner label="Building tool list..." />}
+{result?.error && <ErrMsg msg={result.msg} />}
+{result && !result.error && <>
+<Card accent="#e8a020">
+<div style={{ display:"flex", justifyContent:"space-between", flexWrap:"wrap", gap:
+<div>
+</div>
+<div style={{ display:"flex", gap:8, alignItems:"flex-start", flexWrap:"wrap" }}>
+{(() => { const [bg,fg] = skillCfg[result.skill_level] || ["#1a1a1a","#888"]; r
+</div>
+</div>
+</Card>
+<Card title="REQUIRED TOOLS" accent="#20a0e8">
+<div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:14 }}>
+{Object.entries(catColor).map(([cat,col]) => <span key={cat} style={{ ...S.badge,
+</div>
+{result.required_tools?.map((t,i) => (
+<div key={i} style={{ display:"flex", gap:14, marginBottom:12, paddingBottom:12,
+<div style={{ width:8, flexShrink:0, background:catColor[t.category]||"#555", b
+<div>
+<div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:4 }}>
+<span style={{ color:"#fff", fontFamily:"monospace", fontSize:13 }}>{t.name
+{t.spec && <span style={{ color:"#666", fontSize:11, fontFamily:"monospace"
+</div>
+<div style={S.body}>{t.why}</div>
+</div>
+</div>
+))}
+</Card>
+{result.specialty_tools?.length > 0 && (
+<Card title="SPECIALTY / RENT-OR-BUY TOOLS" accent="#e8a020">
+{result.specialty_tools.map((t,i) => (
+<div key={i} style={{ display:"flex", gap:14, marginBottom:12 }}>
+<div style={{ width:8, flexShrink:0, background:"#e8a020", borderRadius:2 }}
+<div style={{ flex:1 }}>
+<div style={{ display:"flex", justifyContent:"space-between", marginBottom:
+<span style={{ color:"#fff", fontFamily:"monospace", fontSize:13 }}>{t.na
+<span style={{ ...S.badge, background: t.rental_available ? "#0a2a2a":"#2
+{t.rental_available ? "RENT AVAILABLE" : "MUST BUY"}
+</span>
+</div>
+<div style={S.body}>{t.why}</div>
+</div>
+</div>
+))}
+</Card>
+)}
+<li ke
+<li ke
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+<Card title="CONSUMABLES / PARTS" accent="#a020e8">
+<ul style={{ paddingLeft:18, margin:0 }}>{result.consumables?.map((c,i) => </Card>
+<Card title="SAFETY GEAR" accent="#20e870">
+<ul style={{ paddingLeft:18, margin:0 }}>{result.safety_gear?.map((s,i) => </Card>
+</div>
+<Card title="PRO TIPS" accent="#e8e020">
+{result.pro_tips?.map((t,i) => (
+<div key={i} style={{ display:"flex", gap:10, marginBottom:8 }}>
+<span style={{ color:"#e8e020", flexShrink:0 }}>✦</span><span style={S.body}>{t
+</div>
+))}
+</Card>
+<Card title="WHEN TO CALL A PRO" accent="#e84040">
+<p style={{ ...S.body, color:"#ff8080", margin:0 }}>{result.when_to_call_pro}</p>
+</Card>
+</>}
+</div>
+);
+}
+// ── Tab 7: VIN ──
+function VINLookup() {
+const [vin, setVin] = useState(""); const [touched, setTouched] = useState(false);
+const cleanVin = vin.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0,17);
+const isValid = cleanVin.length === 17;
+const services = [
+{ name:"CARFAX", color:"#e84040", badge:"$45 single", desc:"Most comprehensive history re
+{ name:"AUTOCHECK", color:"#20a0e8", badge:"$25 single", desc:"Strong on auction history,
+{ name:"NHTSA RECALLS", color:"#20e870", badge:"FREE", desc:"Government database of all o
+{ name:"VIN DECODER", color:"#e8e020", badge:"FREE", desc:"Decode the VIN to verify year,
+];
+dash,
+return (
+<div>
+<div style={{ marginBottom:14, padding:"12px 16px", background:"#1a1a2a", border:"1px s
+<div style={{ color:"#8080e8", fontFamily:"monospace", fontSize:11, letterSpacing:3,
+<div style={{ ...S.body, fontSize:12 }}>Run a vehicle by VIN to check history reports
+</div>
+<div style={{ marginBottom:20 }}>
+<label style={S.label}>VIN (17 CHARACTERS)</label>
+<input style={{ ...S.select, textTransform:"uppercase", letterSpacing:2, fontSize:16
+placeholder="1HGBH41JXMN109186" value={vin}
+onChange={e => { setVin(e.target.value); setTouched(false); }} maxLength={20} />
+<div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
+<div style={{ fontFamily:"monospace", fontSize:11, color: isValid ? "#20e870" : (to
+{cleanVin.length} / 17 {isValid && "✓"}{touched && !isValid && " — VIN must be 17
+</div>
+<div style={{ fontFamily:"monospace", fontSize:10, color:"#444" }}>VIN is on </div>
+</div>
+<div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+{services.map(svc => (
+<div key={svc.name} style={{ background:"#0d0d0d", border:`1px solid ${svc.color}44
+<div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:s
+<div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-st
+<span style={{ color:svc.color, fontFamily:"monospace", fontSize:13, fontWeight
+<span style={{ ...S.badge, background:`${svc.color}22`, color:svc.color }}>{svc
+</div>
+<p style={{ ...S.body, fontSize:12, marginBottom:14 }}>{svc.desc}</p>
+<button onClick={() => { if (!isValid) { setTouched(true); return; } window.open(
+style={{ ...S.btn, background:svc.btnColor, color: svc.dark ? "#000" : "#fff",
+{svc.btnText}
+</button>
+</div>
+))}
+</div>
+<Card title="PRO TIPS FOR VEHICLE HISTORY" accent="#e8a020">
+{["Always run BOTH a recall check and a paid history report on any used vehicle purch
+"Verify the VIN matches in 3 places: dashboard, door jamb sticker, and title.",
+"Carfax misses ~40% of accidents because they only show what's been reported "If a seller refuses to share the VIN before viewing the vehicle, walk away."].map(
+<div key={i} style={{ display:"flex", gap:10, marginBottom:8 }}>
+<span style={{ color:"#e8a020", flexShrink:0 }}>✦</span><span style={S.body}>{t}<
+</div>
+to ins
+))}
+</Card>
+</div>
+);
+}
+// ── Main App ──
+const TABS = [
+{ label:"COMPLAINT", icon:" " },
+{ label:"DTC CODE", icon:" " },
+{ label:"TORQUE", icon:" " },
+{ label:"FLUIDS", icon:" " },
+{ label:"PARTS $", icon:" " },
+{ label:"TOOLS", icon:" " },
+{ label:"VIN", icon:" " },
+];
+export default function App() {
+const [activeTab, setActiveTab] = useState(0);
+const tabComponents = [ComplaintLookup, DTCLookup, TorqueSpecs, FluidCapacity, PartsEstimat
+const ActiveComponent = tabComponents[activeTab];
+return (
+<div style={{ minHeight:"100vh", background:"#080808", fontFamily:"'Courier New', monospa
+<style>{`
+* { box-sizing: border-box; }
+::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #111; } :
+select option { background: #111; }
+button:disabled { opacity: 0.38; cursor: not-allowed; }
+button:not(:disabled):hover { opacity: 0.82; }
+.spinner { width: 16px; height: 16px; border: 2px solid #2a2a2a; border-top-color: #e
+@keyframes spin { to { transform: rotate(360deg); } }
+input::placeholder, textarea::placeholder { color: #333; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: #e8a020 !imp
+textarea { font-family: 'Courier New', monospace; }
+`}</style>
+{/* Header */}
+<div style={{ borderBottom:"1px solid #1a1a1a", background:"#0a0a0a" }}>
+<div style={{ maxWidth:960, margin:"0 auto", padding:"22px 24px 0" }}>
+<div style={{ fontSize:11, letterSpacing:4, color:"#e8a020", fontWeight:700, <div style={{ fontSize:26, fontWeight:700, color:"#fff", letterSpacing:-0.5, <div style={{ fontSize:11, color:"#3a3a3a", marginBottom:18, letterSpacing:2 margin
+fontFa
+}}>OBD
+{/* Tabs */}
+<div style={{ display:"flex", gap:0, borderTop:"1px solid #1a1a1a", overflowX:"auto
+{TABS.map((tab, i) => (
+<button key={i} onClick={() => setActiveTab(i)} style={{
+background:"none", border:"none", cursor:"pointer", padding:"11px 14px",
+fontFamily:"'Courier New', monospace", fontSize:10, letterSpacing:2, fontWeig
+color: activeTab === i ? "#e8a020" : "#4a4a4a",
+borderTop: activeTab === i ? "2px solid #e8a020" : "2px solid transparent",
+marginTop:-1, transition:"color 0.15s", whiteSpace:"nowrap",
+}}>
+{tab.icon} {tab.label}
+</button>
+))}
+</div>
+</div>
+</div>
+{/* Content */}
+<div style={{ maxWidth:960, margin:"0 auto", padding:"26px 24px 60px" }}>
+<ActiveComponent />
+</div>
+{/* Footer */}
+<div style={{ borderTop:"1px solid #111", padding:"14px 24px", textAlign:"center" }}>
+<div style={{ fontSize:10, color:"#252525", letterSpacing:2 }}>
+FOR REFERENCE ONLY · VERIFY WITH FACTORY SERVICE MANUAL · CONSULT A QUALIFIED TECHN
+</div>
+</div>
+</div>
+);
+}
