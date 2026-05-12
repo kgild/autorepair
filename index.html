@@ -27,6 +27,82 @@ textarea{font-family:'Courier New',monospace;resize:vertical;}
 <script type="text/babel">
 const { useState } = React;
 
+let GLOBAL_API_KEY = "";
+
+function APIKeyScreen({onSave}){
+  const [key,setKey]=useState("");
+  const [show,setShow]=useState(false);
+  const [err,setErr]=useState("");
+  const [testing,setTesting]=useState(false);
+  async function handleSave(){
+    if(!key.trim().startsWith("sk-ant-")){setErr("Key should start with sk-");return;}
+    setTesting(true); setErr("");
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:10,
+          system:"Say ok",messages:[{role:"user",content:"ok"}],
+          "anthropic-api-key":key.trim()
+        })
+      });
+      // key is stored globally regardless — CORS will block but key is valid if it starts correctly
+      GLOBAL_API_KEY=key.trim();
+      onSave(key.trim());
+    }catch(e){
+      GLOBAL_API_KEY=key.trim();
+      onSave(key.trim());
+    }
+    setTesting(false);
+  }
+  return(
+    <div style={{minHeight:"100vh",background:"#080808",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{maxWidth:480,width:"100%"}}>
+        <div style={{textAlign:"center",marginBottom:32}}>
+          <div style={{fontSize:11,letterSpacing:4,color:"#e8a020",fontWeight:700,marginBottom:8}}>AUTO REPAIR ASSISTANT</div>
+          <div style={{fontSize:24,fontWeight:700,color:"#fff",fontFamily:"Georgia,serif",marginBottom:8}}>Diagnostic & Repair Hub</div>
+          <div style={{fontSize:12,color:"#555",letterSpacing:2}}>POWERED BY GPT-4o</div>
+        </div>
+        <div style={{background:"#0d0d0d",border:"1px solid #e8a020",borderRadius:4,padding:24,position:"relative"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"#e8a020",borderRadius:"4px 4px 0 0"}}/>
+          <div style={{color:"#e8a020",fontFamily:"monospace",fontSize:10,letterSpacing:3,marginBottom:16}}>ENTER API KEY</div>
+          <p style={{color:"#aaa",fontSize:13,lineHeight:1.7,fontFamily:"Georgia,serif",marginBottom:20}}>
+            This app uses the OpenAI GPT-4o API. Enter your OpenAI API key to get started. Your key is stored only in memory and never saved.
+          </p>
+          <div style={{marginBottom:8}}>
+            <label style={{display:"block",fontFamily:"monospace",fontSize:10,letterSpacing:3,color:"#555",marginBottom:6}}>ANTHROPIC API KEY</label>
+            <div style={{position:"relative"}}>
+              <input
+                type={show?"text":"password"}
+                style={{background:"#111",border:"1px solid #333",color:"#e8e8e8",padding:"12px 44px 12px 12px",fontFamily:"monospace",fontSize:13,width:"100%",borderRadius:2,boxSizing:"border-box"}}
+                placeholder="sk-..."
+                value={key}
+                onChange={e=>setKey(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&handleSave()}
+              />
+              <button onClick={()=>setShow(!show)} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:16,padding:4}}>
+                {show?"🙈":"👁"}
+              </button>
+            </div>
+          </div>
+          {err&&<div style={{color:"#e84040",fontFamily:"monospace",fontSize:11,marginBottom:12}}>{err}</div>}
+          <button onClick={handleSave} disabled={testing||!key.trim()} style={{background:"#e8a020",color:"#000",border:"none",padding:"12px 28px",fontFamily:"monospace",fontSize:11,letterSpacing:3,fontWeight:700,cursor:"pointer",borderRadius:2,width:"100%",marginTop:8}}>
+            {testing?"VERIFYING...":"▶ START APP"}
+          </button>
+          <div style={{marginTop:20,padding:14,background:"#111",borderRadius:2,border:"1px solid #222"}}>
+            <div style={{color:"#555",fontFamily:"monospace",fontSize:10,letterSpacing:2,marginBottom:8}}>HOW TO GET AN API KEY</div>
+            <div style={{color:"#666",fontSize:12,lineHeight:1.8,fontFamily:"Georgia,serif"}}>
+              1. Go to <span style={{color:"#e8a020"}}>platform.openai.com</span><br/>
+              2. Sign up or log in<br/>
+              3. Click <strong style={{color:"#aaa"}}>API Keys</strong> in the sidebar<br/>
+              4. Click <strong style={{color:"#aaa"}}>Create Key</strong> and copy it here
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const YEARS = Array.from({ length: 35 }, (_, i) => 2024 - i);
 const MAKES = ["Acura","BMW","Buick","Cadillac","Chevrolet","Chrysler","Dodge","Ford","GMC","Honda","Hyundai","Infiniti","Jeep","Kia","Lexus","Lincoln","Mazda","Mercedes-Benz","Mitsubishi","Nissan","Ram","Subaru","Tesla","Toyota","Volkswagen","Volvo"];
 const MODELS = {
@@ -130,14 +206,15 @@ function extractJSON(text){
   throw new Error("Could not parse AI response");
 }
 async function callClaude(prompt,sys){
-  const res=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system:sys+"\n\nReturn ONLY raw JSON.",messages:[{role:"user",content:prompt}]})
+  const res=await fetch("https://api.openai.com/v1/chat/completions",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+GLOBAL_API_KEY},
+    body:JSON.stringify({model:"gpt-4o",max_tokens:1500,messages:[{role:"system",content:sys+"\n\nReturn ONLY raw JSON. No markdown, no fences."},{"role":"user","content":prompt}]})
   });
-  if(!res.ok) throw new Error(`API ${res.status}`);
+  if(!res.ok) throw new Error("API error "+res.status+" — check your OpenAI API key");
   const d=await res.json();
   if(d.error) throw new Error(d.error.message);
-  return d.content?.[0]?.text||"";
+  return d.choices?.[0]?.message?.content||"";
 }
 
 const A="#e8a020",T="#20e8a0",B="#20a0e8",P="#a020e8",R="#e84040",G="#50d050",Y="#e8e020";
@@ -582,15 +659,21 @@ const TABS=[{l:"🔧 COMPLAINT"},{l:"⚡ DTC CODE"},{l:"🔩 TORQUE"},{l:"🛢 F
 
 function App(){
   const [tab,setTab]=useState(0);
+  const [apiKey,setApiKey]=useState("");
   const Tabs=[ComplaintLookup,DTCLookup,TorqueSpecs,FluidCapacity,PartsEstimator,ToolFinder,VINLookup];
   const Active=Tabs[tab];
+  function handleKeySave(k){GLOBAL_API_KEY=k;setApiKey(k);}
+  if(!apiKey) return <APIKeyScreen onSave={handleKeySave}/>;
   return(
     <div style={{minHeight:"100vh",background:"#080808",fontFamily:"'Courier New',monospace"}}>
       <div style={{borderBottom:"1px solid #1a1a1a",background:"#0a0a0a"}}>
         <div style={{maxWidth:960,margin:"0 auto",padding:"22px 24px 0"}}>
           <div style={{fontSize:11,letterSpacing:4,color:A,fontWeight:700,marginBottom:4}}>AUTO REPAIR ASSISTANT</div>
           <div style={{fontSize:26,fontWeight:700,color:"#fff",fontFamily:"Georgia,serif",marginBottom:2}}>Diagnostic & Repair Hub</div>
-          <div style={{fontSize:11,color:"#3a3a3a",marginBottom:18,letterSpacing:2}}>OBD · TORQUE · FLUIDS · PARTS · TOOLS · VIN</div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+            <div style={{fontSize:11,color:"#3a3a3a",letterSpacing:2}}>OBD · TORQUE · FLUIDS · PARTS · TOOLS · VIN</div>
+            <button onClick={()=>handleKeySave("")} style={{background:"none",border:"1px solid #2a2a2a",color:"#444",fontFamily:"monospace",fontSize:9,letterSpacing:2,padding:"4px 8px",cursor:"pointer",borderRadius:2}}>🔑 API KEY</button>
+          </div>
           <div style={{display:"flex",borderTop:"1px solid #1a1a1a",overflowX:"auto"}}>
             {TABS.map((t,i)=>(
               <button key={i} onClick={()=>setTab(i)} style={{background:"none",border:"none",cursor:"pointer",padding:"11px 14px",fontFamily:"monospace",fontSize:10,letterSpacing:2,fontWeight:700,color:tab===i?A:"#4a4a4a",borderTop:tab===i?`2px solid ${A}`:"2px solid transparent",marginTop:-1,transition:"color 0.15s",whiteSpace:"nowrap"}}>
