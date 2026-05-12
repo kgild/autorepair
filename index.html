@@ -35,23 +35,10 @@ function APIKeyScreen({onSave}){
   const [err,setErr]=useState("");
   const [testing,setTesting]=useState(false);
   async function handleSave(){
-    if(!key.trim().startsWith("sk-ant-")){setErr("Key should start with sk-");return;}
+    if(!key.trim().startsWith("sk-")){setErr("Key should start with sk-");return;}
     setTesting(true); setErr("");
-    try{
-      const res=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:10,
-          system:"Say ok",messages:[{role:"user",content:"ok"}],
-          "anthropic-api-key":key.trim()
-        })
-      });
-      // key is stored globally regardless — CORS will block but key is valid if it starts correctly
-      GLOBAL_API_KEY=key.trim();
-      onSave(key.trim());
-    }catch(e){
-      GLOBAL_API_KEY=key.trim();
-      onSave(key.trim());
-    }
+    GLOBAL_API_KEY=key.trim();
+    onSave(key.trim());
     setTesting(false);
   }
   return(
@@ -69,7 +56,7 @@ function APIKeyScreen({onSave}){
             This app uses the OpenAI GPT-4o API. Enter your OpenAI API key to get started. Your key is stored only in memory and never saved.
           </p>
           <div style={{marginBottom:8}}>
-            <label style={{display:"block",fontFamily:"monospace",fontSize:10,letterSpacing:3,color:"#555",marginBottom:6}}>ANTHROPIC API KEY</label>
+            <label style={{display:"block",fontFamily:"monospace",fontSize:10,letterSpacing:3,color:"#555",marginBottom:6}}>OPENAI API KEY</label>
             <div style={{position:"relative"}}>
               <input
                 type={show?"text":"password"}
